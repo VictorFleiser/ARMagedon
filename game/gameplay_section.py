@@ -1,0 +1,307 @@
+import pygame
+import cv2
+import mediapipe as mp
+import numpy as np
+import time
+import random
+
+from assets.assets import WHITE, font
+from game.missiles.missile import Missile
+from game.missiles.spawner_random_pick import RandomPickSpawner
+from game.effects.explosion import ExplosionEffect
+from game.effects.floating_text import FloatingTextEffect
+from game.other_gameplay.buildings import BuildingGrid
+
+class Gameplay:
+    def __init__(self, rect, gameplay_logger):
+        # --- Initialization ---
+        self.background_image = pygame.image.load("assets/sprites/gameplay_bg.png").convert()
+        self.grid_size = 10
+        self.rect = rect
+        self.gameplay_logger = gameplay_logger
+        # # --- Debug mode (terminal display from the initial code back in september/october) ---
+        # self.debug_terminal = False
+        # self.font = pygame.font.SysFont("Consolas", 18)
+        # self.logs = []
+        # self.max_logs = 25
+        # self.last_ground_hit_time = time.time()
+
+        # --- Grid computation ---
+        self.cell_size = self.rect.width // self.grid_size
+        self.grid_origin = self.rect.topleft
+
+        # Example grid state (0 = intact, 1 = destroyed)
+        self.grid = [
+            [0 for _ in range(self.grid_size)]
+            for _ in range(self.grid_size)
+        ]
+
+        # --- Buildings ---
+        self.building_pattern_path = "assets/building_patterns/building_pattern_2"
+        self.buildings = BuildingGrid(self.grid_size, self.rect, self.building_pattern_path)
+
+        # --- Missile spawner ---
+        self.spawner = RandomPickSpawner(
+            gameplay=self,
+            available_letters=["A", "E", "I", "O", "U"]
+        )
+
+        # --- Effects ---
+        self.effects = []
+        self.explosion_sprite = pygame.image.load("assets/sprites/explosion.png").convert_alpha()
+
+
+        # Links to other sections (assigned by main)
+        self.status_panel = None
+        self.bonus_bar = None
+        self.semaphore_panel = None
+
+        self.missiles = []
+
+        self.missile_font = pygame.font.SysFont("Arial", 24, bold=True)
+        self.score_font = pygame.font.SysFont("Arial", 20, bold=True)
+
+        self.last_time = pygame.time.get_ticks()
+
+    # # -------------------------------------------------------
+    # #                     Terminal Logging helper
+    # # -------------------------------------------------------
+    # def log(self, text):
+    #     # used to log to the debug terminal on the gameplay section
+    #     self.logs.append(f"{text}")
+    #     if len(self.logs) > self.max_logs:
+    #         self.logs.pop(0)
+
+    # -------------------------------------------------------
+    #                 Event simulation functions
+    # -------------------------------------------------------
+    def bonus_bar_filled(self):
+        pass
+        # kind = "life" if random.random() < 0.5 else "bomb"
+        # self.log(f"<- bonus bar filled : spawning a {kind} missile")
+
+
+    def resolve_bonus_event(self):
+        pass
+    #     kind = getattr(self, "pending_kind", "life")
+    #     if kind == "life":
+    #         self.log("-> life missile destroyed : life fragment obtained")
+    #         if self.status_panel:
+    #             self.status_panel.gain_life_fragments(1)
+    #     else:
+    #         self.log("-> bomb missile destroyed : bomb fragment obtained")
+    #         if self.status_panel:
+    #             self.status_panel.gain_bomb_fragments(1)
+
+    def semaphore_input(self, semaphore_detected):
+        destroyed = []
+
+        # logging
+        self.gameplay_logger.semaphore_completed(semaphore_detected)
+
+        # check for bomb usage
+        bomb_used = False
+        if semaphore_detected == "SPACE":
+            bomb_used = self.status_panel.use_bomb(1)
+
+        for missile in self.missiles:
+            if bomb_used:
+                destroyed.append(missile)
+            elif missile.letter == semaphore_detected:
+                destroyed.append(missile)
+
+        for missile in destroyed:
+            score = self.compute_missile_score(
+                missile,
+                bomb_used=bomb_used
+            )
+
+            # logging
+            self.gameplay_logger.missile_destroyed(missile, (missile.y - missile.start_y) / missile.distance, score, bomb_used)
+            
+            self.status_panel.gain_score(score)
+            missile.alive = False
+            pos = (missile.x, missile.y)
+
+            self.effects.append(
+                ExplosionEffect(pos, self.explosion_sprite)
+            )
+
+            self.effects.append(
+                FloatingTextEffect(
+                    pos,
+                    f"+{score}",
+                    self.score_font,
+                    (255, 255, 0)
+                )
+            )
+
+        # if semaphore_detected == "SPACE":
+        #     self.log("<- semaphore [SPACE] input : using a bomb to destroy all missiles")
+        #     self.log("-> consume 1 bomb")
+        #     # self.log("-> all missiles on screen destroyed : increase score by +200")
+        #     if self.status_panel:
+        #         self.status_panel.use_bomb(1)
+        #         # self.status_panel.gain_score(200)
+        # else:
+        #     self.log(f"<- semaphore [{semaphore_detected}] input : destroying all [{semaphore_detected}] missiles")
+        #     # self.log(f"-> all [{semaphore_detected}] missiles destroyed : increase score by +100")
+        #     # if self.status_panel:
+        #     #     self.status_panel.gain_score(100)
+
+    def gameover(self):
+        self.log("<- gameover!")
+
+    # -------------------------------------------------------
+    #                    Update loop
+    # -------------------------------------------------------
+    def update(self):
+        now = pygame.time.get_ticks()
+        dt = (now - self.last_time) / 1000.0
+        self.last_time = now
+
+        for missile in self.missiles:
+            if missile.update(dt):
+                break   # missile hit the ground; do not check for collisions (we already reset the map)
+            col, row = self.missile_grid_position(missile)
+
+            if 0 <= row < self.grid_size and 0 <= col < self.grid_size:
+                status = self.buildings.grid[row][col]
+
+                if status == 2:
+                    # missile reached a building
+                    self.buildings.grid[row][col] = 1   # change sprite to damaged
+                    self.buildings.grid[row+1][col] = 0 # remove damaged sprite above
+                    missile.alive = False
+                    # logging
+                    self.gameplay_logger.missile_hit_ground(missile, (missile.y - missile.start_y) / missile.distance)
+
+        self.spawner.update(dt)
+
+        self.missiles = [m for m in self.missiles if m.alive]
+
+
+
+        for effect in self.effects:
+            effect.update(dt)
+
+        self.effects = [e for e in self.effects if e.alive]
+
+    # -------------------------------------------------------
+    #                        Draw
+    # -------------------------------------------------------
+    def draw(self, surface):
+        # if self.debug_terminal:
+        #     self.draw_terminal(surface)
+        # else:
+        self.draw_gameplay(surface)
+
+    # # -------------------------------------------------------
+    # #                TERMINAL DEBUG VIEW
+    # # -------------------------------------------------------
+    # def draw_terminal(self, surface):
+    #     pygame.draw.rect(surface, (10, 10, 10), self.rect)
+    #     x, y = self.rect.x + 10, self.rect.y + 10
+    #     for i, line in enumerate(self.logs[-self.max_logs:]):
+    #         txt = self.font.render(line, True, (0, 255, 0))
+    #         surface.blit(txt, (x, y + i * 20))
+
+    # -------------------------------------------------------
+    #                GAMEPLAY VISUAL VIEW
+    # -------------------------------------------------------
+    def draw_gameplay(self, surface):
+        # --- Background ---
+        bg = pygame.transform.smoothscale(
+            self.background_image,
+            (self.rect.width, self.rect.height)
+        )
+        surface.blit(bg, self.rect.topleft)
+
+        # --- Grid overlay (visible for now) ---
+        for row in range(self.grid_size):
+            for col in range(self.grid_size):
+                cell_x = self.grid_origin[0] + col * self.cell_size
+                # cell_y = self.grid_origin[1] + row * self.cell_size
+                cell_y = self.grid_origin[1] + (self.grid_size - 1 - row) * self.cell_size
+
+                cell_rect = pygame.Rect(
+                    cell_x, cell_y,
+                    self.cell_size, self.cell_size
+                )
+
+                # Color based on state
+                if self.buildings.grid[row][col] == 0:
+                    color = (255, 255, 255, 40)
+                elif self.buildings.grid[row][col] == 1:
+                    color = (255, 200, 80, 100)
+                else:
+                    color = (255, 80, 80, 100)
+
+                pygame.draw.rect(surface, color, cell_rect, 1)
+        
+        # --- Missiles ---
+        for missile in self.missiles:
+            missile.draw(surface)
+
+        # --- Effects ---
+        for effect in self.effects:
+            effect.draw(surface)
+
+        # --- Buildings ---
+        self.buildings.draw(surface)
+
+    # -------------------------------------------------------
+    #                  Missile management
+    # -------------------------------------------------------
+
+    def get_occupied_columns(self):
+        occupied = set()
+        for missile in self.missiles:
+            occupied.add(missile.column)
+        return occupied
+
+    def get_active_letters(self):
+        return {missile.letter for missile in self.missiles}
+
+    def missile_grid_position(self, missile):
+        col = int((missile.x - self.rect.left) / self.buildings.cell_width)
+        row = int((self.rect.bottom - missile.y) / self.buildings.cell_height)
+        return col, row
+
+
+    # -------------------------------------------------------
+    #              Scoring computation
+    # -------------------------------------------------------
+
+    def compute_missile_score(self, missile, bomb_used=False):
+        # Score = how far the missile had progressed (100-0) : so if fully down = 0, at the start = 100
+        # 10x if destroyed before hint shown
+        # 0.1x if bomb used # REMOVED
+        
+        progress = (missile.y - missile.start_y) / missile.distance
+        base_score = int((1.0 - progress) * 100)
+
+        # # Bomb used
+        # if bomb_used:
+        #     base_score = base_score // 10
+        # else :
+        # Destroyed before hint
+        if not missile.should_show_hint():
+            base_score *= 10
+
+        return base_score
+
+    # -------------------------------------------------------
+    #                  Gameplay
+    # -------------------------------------------------------
+
+    def take_damage(self):
+        self.missiles.clear()
+        self.effects.clear()
+        self.reset_buildings()
+        self.status_panel.take_damage()
+
+    def reset_buildings(self):
+        # reapply initial building pattern
+        self.buildings = BuildingGrid(self.grid_size, self.rect, self.building_pattern_path)
+
