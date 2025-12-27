@@ -8,6 +8,7 @@ import random
 from assets.assets import WHITE, font
 from game.missiles.missile import Missile
 from game.missiles.spawner_random_pick import RandomPickSpawner
+from game.missiles.spawner_bkt_pick import BKTPickSpawner
 from game.effects.explosion import ExplosionEffect
 from game.effects.floating_text import FloatingTextEffect
 from game.other_gameplay.buildings import BuildingGrid
@@ -40,10 +41,22 @@ class Gameplay:
         self.building_pattern_path = "assets/building_patterns/building_pattern_2"
         self.buildings = BuildingGrid(self.grid_size, self.rect, self.building_pattern_path)
 
-        # --- Missile spawner ---
-        self.spawner = RandomPickSpawner(
+        # self.spawner = RandomPickSpawner(gameplay=self, available_letters=["A", "E", "I", "O", "U"])
+        # --- Missile spawner (BKT-based) ---
+        self.spawner = BKTPickSpawner(
             gameplay=self,
-            available_letters=["A", "E", "I", "O", "U"]
+            available_letters=["A", "E", "I", "O", "U"],
+            spawn_interval=5.0,
+            speed_range=(10.0, 15.0),
+            hint_min=0.3,
+            hint_max=0.8,
+            focus_weak_prob=0.8,
+            bkt_params={
+                'p_l0': 0.0, # Initial probability of knowing
+                'p_t': 0.1, # Transition/learning probability
+                'p_s': 0.1, # Slip probability
+                'p_g': 0.25 # Guess probability
+            }
         )
 
         # --- Effects ---
@@ -62,6 +75,9 @@ class Gameplay:
         self.score_font = pygame.font.SysFont("Arial", 20, bold=True)
 
         self.last_time = pygame.time.get_ticks()
+        
+        self.bkt_snapshot_interval = 5.0
+        self.bkt_snapshot_timer = 0.0
 
     # # -------------------------------------------------------
     # #                     Terminal Logging helper
@@ -119,6 +135,13 @@ class Gameplay:
             # logging
             self.gameplay_logger.missile_destroyed(missile, (missile.y - missile.start_y) / missile.distance, score, bomb_used)
             
+            # Update BKT model
+            if isinstance(self.spawner, BKTPickSpawner):
+                if bomb_used:
+                    self.spawner.on_missile_destroyed_bomb(missile.letter)
+                else:
+                    self.spawner.on_missile_destroyed_correct(missile.letter)
+            
             self.status_panel.gain_score(score)
             missile.alive = False
             pos = (missile.x, missile.y)
@@ -150,7 +173,8 @@ class Gameplay:
         #     #     self.status_panel.gain_score(100)
 
     def gameover(self):
-        self.log("<- gameover!")
+        # self.log("<- gameover!") # skip since error
+        pass 
 
     # -------------------------------------------------------
     #                    Update loop
@@ -162,6 +186,9 @@ class Gameplay:
 
         for missile in self.missiles:
             if missile.update(dt):
+                # missile hit the ground
+                if isinstance(self.spawner, BKTPickSpawner):
+                    self.spawner.on_missile_hit_ground(missile.letter)
                 break   # missile hit the ground; do not check for collisions (we already reset the map)
             col, row = self.missile_grid_position(missile)
 
@@ -173,6 +200,9 @@ class Gameplay:
                     self.buildings.grid[row][col] = 1   # change sprite to damaged
                     self.buildings.grid[row+1][col] = 0 # remove damaged sprite above
                     missile.alive = False
+                    # update BKT for building hit (miss)
+                    if isinstance(self.spawner, BKTPickSpawner):
+                        self.spawner.on_missile_hit_ground(missile.letter)
                     # logging
                     self.gameplay_logger.missile_hit_ground(missile, (missile.y - missile.start_y) / missile.distance)
 
@@ -186,6 +216,14 @@ class Gameplay:
             effect.update(dt)
 
         self.effects = [e for e in self.effects if e.alive]
+        
+        # BKT logging
+        if isinstance(self.spawner, BKTPickSpawner):
+            self.bkt_snapshot_timer += dt
+            if self.bkt_snapshot_timer >= self.bkt_snapshot_interval:
+                self.bkt_snapshot_timer = 0.0
+                bkt_state = self.spawner.get_bkt_state()
+                self.gameplay_logger.bkt_state_snapshot(bkt_state, verbose=True)
 
     # -------------------------------------------------------
     #                        Draw

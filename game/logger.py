@@ -97,6 +97,34 @@ class GameplayLogger(BaseLogger):
 			new_score=new_score
 		)
 
+	# -- BKT --
+	def bkt_update(self, letter, outcome, p_k, verbose=True):
+		# outcome: 'correct', 'incorrect', or 'bomb_ignore'
+		if verbose: print(f"[BKT] Letter '{letter}' - Outcome: {outcome:12s} - P(K): {p_k:.4f}")
+		self.log(
+			"bkt_update",
+			letter=letter,
+			outcome=outcome,
+			p_k=p_k
+		)
+	
+	def bkt_state_snapshot(self, all_p_k, verbose=False):
+		# visual and useful for debugging, i'll leave it here
+		if verbose:
+			print("\n" + "="*60)
+			print("BKT State Snapshot - Knowledge Probabilities")
+			print("="*60)
+		sorted_letters = sorted(all_p_k.items(), key=lambda x: x[1])
+		for letter, p_k in sorted_letters:
+			bar_length = int(p_k * 40)
+			bar = '█' * bar_length + '░' * (40 - bar_length)
+			if verbose: print(f"  {letter}: {p_k:.4f} [{bar}]")
+		if verbose: print("="*60 + "\n")
+		self.log(
+			"bkt_state_snapshot",
+			all_p_k=all_p_k
+		)
+
 
 class WebcamLogger(BaseLogger):
 
