@@ -45,9 +45,11 @@ class Gameplay:
         # --- Missile spawner (BKT-based) ---
         self.spawner = BKTPickSpawner(
             gameplay=self,
-            available_letters=["A", "E", "I", "O", "U"],
-            spawn_interval=5.0,
-            speed_range=(10.0, 15.0),
+            available_letters=list("EAISNRTOLUDCMPGBVHFQYXJKWZ"),
+            initial_number_of_letters_tested=1,
+            overall_knowledge_threshold=0.5,
+            spawn_interval=4.0,
+            speed_range=(12.5, 12.5),
             hint_min=0.3,
             hint_max=0.8,
             focus_weak_prob=0.8,

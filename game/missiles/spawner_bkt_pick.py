@@ -11,7 +11,9 @@ class BKTPickSpawner(MissileSpawner):
 		self,
 		gameplay,
 		available_letters, # letters to spawn
-		spawn_interval=5.0,
+		initial_number_of_letters_tested=1, # how many different letters to use at start
+		overall_knowledge_threshold=0.5, # average knowledge to increase letter pool
+		spawn_interval=3.0,
 		speed_range=(10.0, 15.0), # missile (lower is faster)
 		hint_min=0.3, # where hint can appear
 		hint_max=0.8,
@@ -21,6 +23,9 @@ class BKTPickSpawner(MissileSpawner):
 		super().__init__(gameplay)
 		
 		self.available_letters = available_letters
+		self.number_of_letters_tested = initial_number_of_letters_tested
+		self.overall_knowledge_threshold = overall_knowledge_threshold
+		self.overall_knowledge = 0.0
 		self.spawn_interval = spawn_interval
 		self.speed_range = speed_range
 		self.hint_min = hint_min
@@ -32,6 +37,7 @@ class BKTPickSpawner(MissileSpawner):
 			bkt_params = {}
 		self.bkt = BKTModel(
 			letters=available_letters,
+			initial_number_of_letters_tested=initial_number_of_letters_tested,
 			p_l0=bkt_params.get('p_l0', 0.0), # 0 in theory
 			p_t=bkt_params.get('p_t', 0.1),
 			p_s=bkt_params.get('p_s', 0.1),
@@ -42,6 +48,12 @@ class BKTPickSpawner(MissileSpawner):
 	
 	def update(self, dt): # every frame
 		self.timer += dt
+
+		if self.bkt.get_lowest_overall_knowledge() >= self.overall_knowledge_threshold:
+			# increase letter pool if possible
+			if self.number_of_letters_tested < len(self.available_letters):
+				self.number_of_letters_tested += 1
+				self.bkt.number_of_letters_tested = self.number_of_letters_tested
 		
 		if self.timer >= self.spawn_interval:
 			self.timer -= self.spawn_interval
@@ -50,16 +62,19 @@ class BKTPickSpawner(MissileSpawner):
 	def select_letter_adaptive(self):
 		free_letters = self.get_free_letters() # letters not on screen
 		if free_letters is None: return None
-		free_letters = list(set(free_letters) & set(self.available_letters))
+		free_letters = list(set(free_letters) & set(self.available_letters[:self.number_of_letters_tested]))
 		if not free_letters: return None
 		
 		if random.random() < self.focus_weak_prob: # focus on weakness
-			letter_knowledge = [(letter, self.bkt.get_knowledge(letter)) for letter in free_letters]
-			letter_knowledge.sort(key=lambda x: x[1]) # weakest first
+			# letter_knowledge = [(letter, self.bkt.get_knowledge(letter)) for letter in free_letters]
+			# letter_knowledge.sort(key=lambda x: x[1]) # weakest first
 			
-			n_candidates = min(3, len(letter_knowledge)) # top 3 weakest
-			candidates = [letter for letter, _ in letter_knowledge[:n_candidates]]
-			letter = random.choice(candidates)
+			# n_candidates = min(3, len(letter_knowledge)) # top 3 weakest
+			# candidates = [letter for letter, _ in letter_knowledge[:n_candidates]]
+			# letter = random.choice(candidates)
+			letter = random.choice(self.bkt.get_weakest_letters(n=2, all_letters=False))[0]
+			if letter not in free_letters:
+				letter = random.choice(free_letters)
 		else: # random pick
 			letter = random.choice(free_letters)
 		
@@ -69,8 +84,8 @@ class BKTPickSpawner(MissileSpawner):
 		""" Show hints based on P(K): lower knowledge = earlier hints, higher = later """
 		p_k = self.bkt.get_knowledge(letter)
 		base_hint = self.hint_min + p_k * (self.hint_max - self.hint_min)
-		randomness = random.uniform(-0.1, 0.1)
-		hint_start = base_hint + randomness
+		# randomness = random.uniform(-0.1, 0.1)
+		hint_start = base_hint #+ randomness
 		hint_start = max(self.hint_min, min(self.hint_max, hint_start))
 		
 		return hint_start

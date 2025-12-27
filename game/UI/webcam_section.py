@@ -5,6 +5,8 @@ import numpy as np
 import time
 import math
 
+from assets.assets import semaphores_mapping
+
 # --- Mediapipe setup ---
 mp_holistic = mp.solutions.holistic
 mp_drawing = mp.solutions.drawing_utils
@@ -15,75 +17,74 @@ cap = cv2.VideoCapture(0)
 
 # Semaphore Definitions
 # Right hand, Left hand
-SEMAPHORE_LETTERS = {
-    ('Low Right', 'Down'): 'A',
-    ('Down', 'Low Right'): 'A',
-    ('Right', 'Down'): 'B',
-    ('Down', 'Right',): 'B',
-    ('High Right', 'Down'): 'C',
-    ('Down', 'High Right'): 'C',
-    ('Up', 'Down'): 'D',
-    ('Down', 'Up'): 'D',
-    ('Down', 'High Left'): 'E',
-    ('High Left', 'Down'): 'E',
-    ('Down', 'Left'): 'F',
-    ('Left', 'Down'): 'F',
-    ('Down', 'Low Left'): 'G',
-    ('Low Left', 'Down'): 'G',
-    ('Right', 'Low Right'): 'H',
-    ('Low Right', 'Right'): 'H',
-    ('High Right', 'Low Right'): 'I',
-    ('Low Right', 'High Right'): 'I',
-    ('Up', 'Right'): 'J',
-    ('Right', 'Up'): 'J',
-    ('Low Right', 'Up'): 'K',
-    ('Up', 'Low Right'): 'K',
-    ('Low Right', 'High Left'): 'L',
-    ('High Left', 'Low Right'): 'L',
-    ('Low Right', 'Left'): 'M',
-    ('Left', 'Low Right'): 'M',
-    ('Low Right', 'Low Left'): 'N',
-    ('Low Left', 'Low Right'): 'N',
-    ('High Right', 'Right'): 'O',
-    ('Right', 'High Right'): 'O',
-    ('Right', 'Up'): 'P',
-    ('Up', 'Right'): 'P',
-    ('Right', 'High Left'): 'Q',
-    ('High Left', 'Right'): 'Q',
-    ('Right', 'Left'): 'R',
-    ('Left', 'Right'): 'R',
-    ('Right', 'Low Left'): 'S',
-    ('Low Left', 'Right'): 'S',
-    ('High Right', 'Up'): 'T',
-    ('Up', 'High Right'): 'T',
-    ('High Right', 'High Left'): 'U',
-    ('High Left', 'High Right'): 'U',
-    ('Up', 'Low Left'): 'V',
-    ('Low Left', 'Up'): 'V',
-    ('Left', 'High Left'): 'W',
-    ('High Left', 'Left'): 'W',
-    ('Low Left', 'High Left'): 'X',
-    ('High Left', 'Low Left'): 'X',
-    ('High Right', 'Left'): 'Y',
-    ('Left', 'High Right'): 'Y',
-    ('Low Left', 'Left'): 'Z',
-    ('Left', 'Low Left'): 'Z',
-    ('Down', 'Down'): 'SPACE', # Bomb
-    # UNUSED COMBINATIONS :
-    ('Low Left', 'High Right'): 'CANCEL',
-    ('High Right', 'Low Left'): 'CANCEL',
-    ('High Left', 'Up'): 'NUMERIC',
-    ('Up', 'High Left'): 'NUMERIC',
-    ('Left', 'Up'): 'unused_1',
-    ('Up', 'Left'): 'unused_1',
-    ('Up', 'Up'): 'unused_2',
-    ('High Right', 'High Right'): 'unused_3',
-    ('Right', 'Right'): 'unused_4',
-    ('Low Right', 'Low Right'): 'unused_5',
-    ('Low Left', 'Low Left'): 'unused_6',
-    ('Left', 'Left'): 'unused_7',
-    ('High Left', 'High Left'): 'unused_8',
-}
+SEMAPHORE_LETTERS = semaphores_mapping
+# SEMAPHORE_LETTERS = {
+#     ('Low_Right', 'Down'): 'A',
+#     ('Down', 'Low_Right'): 'A',
+#     ('Right', 'Down'): 'B',
+#     ('Down', 'Right',): 'B',
+#     ('High_Right', 'Down'): 'C',
+#     ('Down', 'High_Right'): 'C',
+#     ('Up', 'Down'): 'D',
+#     ('Down', 'Up'): 'D',
+#     ('Down', 'High_Left'): 'E',
+#     ('High_Left', 'Down'): 'E',
+#     ('Down', 'Left'): 'F',
+#     ('Left', 'Down'): 'F',
+#     ('Down', 'Low_Left'): 'G',
+#     ('Low_Left', 'Down'): 'G',
+#     ('Right', 'Low_Right'): 'H',
+#     ('Low_Right', 'Right'): 'H',
+#     ('High_Right', 'Low_Right'): 'I',
+#     ('Low_Right', 'High_Right'): 'I',
+#     ('Up', 'Left'): 'J',
+#     ('Left', 'Up'): 'J',
+#     ('Low_Right', 'Up'): 'K',
+#     ('Up', 'Low_Right'): 'K',
+#     ('Low_Right', 'High_Left'): 'L',
+#     ('High_Left', 'Low_Right'): 'L',
+#     ('Low_Right', 'Left'): 'M',
+#     ('Left', 'Low_Right'): 'M',
+#     ('Low_Right', 'Low_Left'): 'N',
+#     ('Low_Left', 'Low_Right'): 'N',
+#     ('High_Right', 'Right'): 'O',
+#     ('Right', 'High_Right'): 'O',
+#     ('Right', 'Up'): 'P',
+#     ('Up', 'Right'): 'P',
+#     ('Right', 'High_Left'): 'Q',
+#     ('High_Left', 'Right'): 'Q',
+#     ('Right', 'Left'): 'R',
+#     ('Left', 'Right'): 'R',
+#     ('Right', 'Low_Left'): 'S',
+#     ('Low_Left', 'Right'): 'S',
+#     ('High_Right', 'Up'): 'T',
+#     ('Up', 'High_Right'): 'T',
+#     ('High_Right', 'High_Left'): 'U',
+#     ('High_Left', 'High_Right'): 'U',
+#     ('Up', 'Low_Left'): 'V',
+#     ('Low_Left', 'Up'): 'V',
+#     ('Left', 'High_Left'): 'W',
+#     ('High_Left', 'Left'): 'W',
+#     ('Low_Left', 'High_Left'): 'X',
+#     ('High_Left', 'Low_Left'): 'X',
+#     ('High_Right', 'Left'): 'Y',
+#     ('Left', 'High_Right'): 'Y',
+#     ('Low_Left', 'Left'): 'Z',
+#     ('Left', 'Low_Left'): 'Z',
+#     ('Down', 'Down'): 'SPACE', # Bomb
+#     # UNUSED COMBINATIONS :
+#     ('Low_Left', 'High_Right'): 'CANCEL',
+#     ('High_Right', 'Low_Left'): 'CANCEL',
+#     ('High_Left', 'Up'): 'NUMERIC',
+#     ('Up', 'High_Left'): 'NUMERIC',
+#     ('Up', 'Up'): 'unused_2',
+#     ('High_Right', 'High_Right'): 'unused_3',
+#     ('Right', 'Right'): 'unused_4',
+#     ('Low_Right', 'Low_Right'): 'unused_5',
+#     ('Low_Left', 'Low_Left'): 'unused_6',
+#     ('Left', 'Left'): 'unused_7',
+#     ('High_Left', 'High_Left'): 'unused_8',
+# }
 
 # Helper Functions
 def calculate_angle(point1, point2):
@@ -106,19 +107,19 @@ def get_palm_top_coords(hand_landmarks, image_width, image_height):
 
 def get_hand_position(angle):
     if -22.5 <= angle <= 22.5: return 'Right'
-    elif 22.5 < angle <= 67.5: return 'Low Right'
+    elif 22.5 < angle <= 67.5: return 'Low_Right'
     elif 67.5 < angle <= 112.5: return 'Down'
-    elif 112.5 < angle <= 157.5: return 'Low Left'
+    elif 112.5 < angle <= 157.5: return 'Low_Left'
     elif 157.5 < angle <= 180 or -180 <= angle <= -157.5: return 'Left'
-    elif -157.5 < angle <= -112.5: return 'High Left'
+    elif -157.5 < angle <= -112.5: return 'High_Left'
     elif -112.5 < angle <= -67.5: return 'Up'
-    elif -67.5 < angle < -22.5: return 'High Right'
+    elif -67.5 < angle < -22.5: return 'High_Right'
     return None
 
 def get_position_angle(position):
     """Get the angle (degrees) for a hand position"""
-    position_angles = {'Right': 0, 'Low Right': 45, 'Down': 90, 'Low Left': 135,
-                       'Left': 180, 'High Left': -135, 'Up': -90, 'High Right': -45}
+    position_angles = {'Right': 0, 'Low_Right': 45, 'Down': 90, 'Low_Left': 135,
+                       'Left': 180, 'High_Left': -135, 'Up': -90, 'High_Right': -45}
     return position_angles.get(position, 0)
 
 def draw_guide_lines(frame, body_center, detected_letter, image_width, image_height):

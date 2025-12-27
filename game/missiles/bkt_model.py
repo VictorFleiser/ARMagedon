@@ -13,12 +13,14 @@ class BKTModel:
 	def __init__(
 		self,
 		letters,
+		initial_number_of_letters_tested,
 		p_l0=0.0,
 		p_t=0.1,
 		p_s=0.1,
 		p_g=0.25
 	):
 		self.letters = letters
+		self.number_of_letters_tested = initial_number_of_letters_tested
 		self.p_l0 = p_l0
 		self.p_t = p_t
 		self.p_s = p_s
@@ -82,13 +84,44 @@ class BKTModel:
 	def get_knowledge(self, letter):
 		return self.p_k.get(letter, self.p_l0)
 	
-	def get_all_knowledge(self):
-		return dict(self.p_k)
+	def get_all_knowledge(self, all_letters=False):
+		# all_letters: if True, return knowledge for all letters, else only for tested letters
+		if all_letters:
+			return dict(self.p_k)
+		else:
+			return {letter: self.p_k[letter] for letter in self.letters[:self.number_of_letters_tested]}
 	
-	def get_weakest_letters(self, n=5):
-		sorted_letters = sorted(self.p_k.items(), key=lambda x: x[1])
+	def get_weakest_letters(self, n=5, all_letters=False):
+		# Return n letters with lowest P(K)
+		# if all_letters is True, consider all letters, else only tested letters
+		if all_letters:
+			sorted_letters = sorted(self.p_k.items(), key=lambda x: x[1])
+		else:
+			sorted_letters = sorted(
+				{letter: self.p_k[letter] for letter in self.letters[:self.number_of_letters_tested]}.items(),
+				key=lambda x: x[1]
+			)
 		return sorted_letters[:n]
 	
-	def get_strongest_letters(self, n=5):
-		sorted_letters = sorted(self.p_k.items(), key=lambda x: x[1], reverse=True)
+	def get_strongest_letters(self, n=5, all_letters=False):
+		if all_letters:
+			sorted_letters = sorted(self.p_k.items(), key=lambda x: x[1], reverse=True)
+		else:
+			sorted_letters = sorted(
+				{letter: self.p_k[letter] for letter in self.letters[:self.number_of_letters_tested]}.items(),
+				key=lambda x: x[1],
+				reverse=True
+			)
 		return sorted_letters[:n]
+	
+	def get_lowest_overall_knowledge(self, all_letters=False):
+		if all_letters:
+			knowledge_values = self.p_k.values()
+		else:
+			knowledge_values = [self.p_k[letter] for letter in self.letters[:self.number_of_letters_tested]]
+		
+		if not knowledge_values:
+			return 0.0
+		
+		# return sum(knowledge_values) / len(knowledge_values)
+		return min(knowledge_values)
