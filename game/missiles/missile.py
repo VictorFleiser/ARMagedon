@@ -90,7 +90,7 @@ class Missile:
 		surface.blit(self.sprite, rect)
 
 		# Letter overlay
-		letter_surface = self.font.render(self.letter, True, (255, 255, 255))
+		letter_surface = self.font.render(self.letter, True, (0, 0, 0))
 		letter_rect = letter_surface.get_rect(center=(self.x, self.y))
 		surface.blit(letter_surface, letter_rect)
 

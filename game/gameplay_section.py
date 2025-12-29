@@ -73,7 +73,7 @@ class Gameplay:
 
         self.missiles = []
 
-        self.missile_font = pygame.font.SysFont("Arial", 24, bold=True)
+        self.missile_font = pygame.font.SysFont("Arial", 64, bold=True)
         self.score_font = pygame.font.SysFont("Arial", 20, bold=True)
 
         self.last_time = pygame.time.get_ticks()
