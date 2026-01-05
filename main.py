@@ -50,6 +50,9 @@ gameplay_section.status_panel = status_section
 gameplay_section.bonus_bar = bonus_section
 gameplay_section.semaphore_panel = semaphore_section
 
+# --- Debug mode ---
+debug_mode = False
+
 # --- Main loop ---
 running = True
 while running:
@@ -71,6 +74,11 @@ while running:
 
         elif event.type == pygame.USEREVENT + 10:  # resolve bonus missile
             gameplay_section.resolve_bonus_event()
+        
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_d:
+                debug_mode = not debug_mode
+                print(f"Debug mode: {'ON' if debug_mode else 'OFF'}")
 
     # # Test keyboard input
     # keys = pygame.key.get_pressed()
@@ -96,11 +104,11 @@ while running:
     gameplay_section.update()
 
     screen.fill(BLACK)
-    gameplay_section.draw(screen)
+    gameplay_section.draw(screen, debug_mode=debug_mode)
     status_section.draw(screen)
     semaphore_section.draw(screen)
     bonus_section.draw(screen)
-    webcam_section.draw(screen, frame)
+    webcam_section.draw(screen, frame, debug_mode=debug_mode)
 
     pygame.display.flip()
     clock.tick(60)

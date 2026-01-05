@@ -234,11 +234,11 @@ class Gameplay:
     # -------------------------------------------------------
     #                        Draw
     # -------------------------------------------------------
-    def draw(self, surface):
+    def draw(self, surface, debug_mode=False):
         # if self.debug_terminal:
         #     self.draw_terminal(surface)
         # else:
-        self.draw_gameplay(surface)
+        self.draw_gameplay(surface, debug_mode)
 
     # # -------------------------------------------------------
     # #                TERMINAL DEBUG VIEW
@@ -253,7 +253,7 @@ class Gameplay:
     # -------------------------------------------------------
     #                GAMEPLAY VISUAL VIEW
     # -------------------------------------------------------
-    def draw_gameplay(self, surface):
+    def draw_gameplay(self, surface, debug_mode=False):
         # --- Background ---
         bg = pygame.transform.smoothscale(
             self.background_image,
@@ -286,6 +286,77 @@ class Gameplay:
         # --- Missiles ---
         for missile in self.missiles:
             missile.draw(surface)
+            
+            # Missile debug info (only in debug mode)
+            if debug_mode:
+                progress = (missile.y - missile.start_y) / missile.distance
+                
+                # Get BKT parameters for this missile's letter
+                debug_lines = [
+                    f"Pos: {progress:.3f}",
+                    f"Hint: {missile.hint_start:.2f}",
+                ]
+                
+                if isinstance(self.spawner, BKTPickSpawner):
+                    p_k = self.spawner.bkt.get_knowledge(missile.letter)
+                    p_l0 = self.spawner.bkt.p_l0
+                    p_t = self.spawner.bkt.p_t
+                    p_s = self.spawner.bkt.p_s
+                    p_g = self.spawner.bkt.p_g
+                    debug_lines.extend([
+                        f"P(K): {p_k:.2f}",
+                        f"P(L0): {p_l0:.2f}",
+                        f"P(T): {p_t:.2f}",
+                        f"P(S): {p_s:.2f}",
+                        f"P(G): {p_g:.2f}"
+                    ])
+                
+                # Draw missile info text
+                debug_font = pygame.font.SysFont("Arial", 14)
+                text_y = missile.y + 60
+                for line in debug_lines:
+                    if line:  # Only draw non-empty lines
+                        text_surface = debug_font.render(line, True, (255, 255, 0))
+                        text_rect = text_surface.get_rect(center=(missile.x, text_y))
+                        # Draw background for readability
+                        bg_rect = text_rect.inflate(4, 2)
+                        pygame.draw.rect(surface, (0, 0, 0, 180), bg_rect)
+                        surface.blit(text_surface, text_rect)
+                        text_y += 16
+
+        # --- Debug: Show all semaphores with P(K) ---
+        if debug_mode and isinstance(self.spawner, BKTPickSpawner):
+            debug_font_small = pygame.font.SysFont("Arial", 12)
+            x_offset = self.rect.left + 10
+            y_offset = self.rect.top + 10
+            
+            # Get all letters and their knowledge
+            all_letters = self.spawner.available_letters
+            tested_count = self.spawner.number_of_letters_tested
+            
+            # Title
+            title_surface = debug_font_small.render("Semaphore Knowledge:", True, (255, 255, 255))
+            title_bg = pygame.Rect(x_offset - 2, y_offset - 2, title_surface.get_width() + 4, title_surface.get_height() + 4)
+            pygame.draw.rect(surface, (0, 0, 0, 200), title_bg)
+            surface.blit(title_surface, (x_offset, y_offset))
+            y_offset += 18
+            
+            # List all letters
+            for i, letter in enumerate(all_letters):
+                p_k = self.spawner.bkt.get_knowledge(letter)
+                
+                # Grey out letters not yet tested
+                if i >= tested_count:
+                    color = (100, 100, 100)
+                else:
+                    color = (255, 255, 255)
+                
+                text = f"{letter}: {p_k:.3f}"
+                text_surface = debug_font_small.render(text, True, color)
+                text_bg = pygame.Rect(x_offset - 2, y_offset - 2, text_surface.get_width() + 4, text_surface.get_height() + 4)
+                pygame.draw.rect(surface, (0, 0, 0, 180), text_bg)
+                surface.blit(text_surface, (x_offset, y_offset))
+                y_offset += 14
 
         # --- Effects ---
         for effect in self.effects:

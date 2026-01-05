@@ -122,24 +122,43 @@ def get_position_angle(position):
                        'Left': 180, 'High_Left': -135, 'Up': -90, 'High_Right': -45}
     return position_angles.get(position, 0)
 
+def draw_filled_octant(frame, body_center, position, color, alpha=0.3, image_width=640, image_height=480):
+    if not body_center:
+        return
+    
+    center_angle = get_position_angle(position)
+    
+    start_angle = center_angle - 22.5
+    end_angle = center_angle + 22.5
+    
+    radius = int(math.sqrt(image_width**2 + image_height**2))
+    overlay = frame.copy()
+    points = [body_center]
+    num_points = 20
+    for i in range(num_points + 1):
+        angle = start_angle + (end_angle - start_angle) * i / num_points
+        angle_rad = math.radians(angle)
+        x = int(body_center[0] + radius * math.cos(angle_rad))
+        y = int(body_center[1] + radius * math.sin(angle_rad))
+        points.append((x, y))
+    
+    points = np.array(points, dtype=np.int32)
+    cv2.fillPoly(overlay, [points], color)
+    cv2.addWeighted(overlay, alpha, frame, 1 - alpha, 0, frame)
+
 def draw_guide_lines(frame, body_center, detected_letter, image_width, image_height):
-    """Draws purple guide lines showing optimal hand positions.
-    Also draw semi-transparent angles from center"""
+    """Draws filled octants showing optimal hand positions."""
     if not body_center or not detected_letter: return
     
     target_positions = next(((rh, lh) for (rh, lh), letter in SEMAPHORE_LETTERS.items() if letter == detected_letter), None)
     if not target_positions: return
-
-    line_length = min(image_width, image_height) // 4
     
-    for hand, target_pos in zip(["R", "L"], target_positions):
-        angle_deg = get_position_angle(target_pos)
-        angle_rad = math.radians(angle_deg)
-        end_x = int(body_center[0] + line_length * math.cos(angle_rad))
-        end_y = int(body_center[1] + line_length * math.sin(angle_rad))
-        cv2.line(frame, body_center, (end_x, end_y), (255, 0, 255), 3)
-        cv2.putText(frame, f'{hand}:{target_pos}', (end_x + 5, end_y),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 255), 2)
+    # Draw filled octants for target positions
+    colors = [(255, 0, 255), (255, 150, 255)]
+    
+    for i, (hand, target_pos) in enumerate(zip(["R", "L"], target_positions)):
+        draw_filled_octant(frame, body_center, target_pos, colors[i], alpha=0.15, 
+                          image_width=image_width, image_height=image_height)
 
 def draw_additional_guidelines(frame, body_center):
     for angle in range(-180, 180, 45):
@@ -158,6 +177,11 @@ class WebcamPanel:
         # for logging purposes
         self.valid_landmarks_flag = False
         self.last_detected_semaphore = "None"
+        
+        # Store hand coordinates for debug visualization
+        self.debug_right_hand_coords = None
+        self.debug_left_hand_coords = None
+        self.debug_body_center = None
 
     def update(self):
         ret, frame = cap.read()
@@ -211,10 +235,13 @@ class WebcamPanel:
         if right_hand_coords and body_center:
             angle = calculate_angle(body_center, right_hand_coords)
             physical_right_hand_pos = get_hand_position(angle)
-            cv2.line(frame, body_center, right_hand_coords, (200, 200, 0), 2)
             if physical_right_hand_pos:
                 cv2.putText(frame, f'Right Hand (Screen): {physical_right_hand_pos}', (10, 60),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (200, 200, 0), 2)
+        
+        # Store for debug visualization
+        self.debug_right_hand_coords = right_hand_coords
+        self.debug_body_center = body_center
 
         # Left hand (Screen Right)
         left_hand_coords = None
@@ -229,10 +256,12 @@ class WebcamPanel:
         if left_hand_coords and body_center:
             angle = calculate_angle(body_center, left_hand_coords)
             physical_left_hand_pos = get_hand_position(angle)
-            cv2.line(frame, body_center, left_hand_coords, (0, 255, 0), 2)
             if physical_left_hand_pos:
-                 cv2.putText(frame, f'Left Hand (Screen): {physical_left_hand_pos}', (10, 30),
+                cv2.putText(frame, f'Left Hand (Screen): {physical_left_hand_pos}', (10, 30),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+        
+        # Store for debug visualization
+        self.debug_left_hand_coords = left_hand_coords
             
         # Logging
         if self.valid_landmarks_flag :
@@ -259,6 +288,12 @@ class WebcamPanel:
             detected_semaphore = SEMAPHORE_LETTERS.get(key, "NONE")
             if detected_semaphore != "NONE":
                  draw_guide_lines(frame, body_center, detected_semaphore, image_width, image_height)
+            else:
+                # Only show current hand positions if not forming a valid letter
+                draw_filled_octant(frame, body_center, physical_right_hand_pos, (200, 200, 0), 
+                                  alpha=0.15, image_width=image_width, image_height=image_height)
+                draw_filled_octant(frame, body_center, physical_left_hand_pos, (0, 255, 0), 
+                                  alpha=0.15, image_width=image_width, image_height=image_height)
         
         # Logging
         if detected_semaphore != self.last_detected_semaphore:
@@ -270,9 +305,17 @@ class WebcamPanel:
             })
         return frame, detected_semaphore
 
-    def draw(self, surface, frame):
+    def draw(self, surface, frame, debug_mode=False):
         if frame is None:
             return
+        
+        if self.debug_body_center:
+            if self.debug_right_hand_coords:
+                cv2.arrowedLine(frame, self.debug_body_center, self.debug_right_hand_coords, 
+                              (0, 200, 200), 3, tipLength=0.3)
+            if self.debug_left_hand_coords:
+                cv2.arrowedLine(frame, self.debug_body_center, self.debug_left_hand_coords, 
+                              (0, 255, 0), 3, tipLength=0.3)
             
         x, y, w, h = self.rect
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
