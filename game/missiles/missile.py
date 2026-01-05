@@ -5,6 +5,7 @@ import uuid
 from assets.assets import PURPLE
 from assets.assets import SEMAPHORES_PATH
 
+
 sprite = pygame.image.load("assets/sprites/missile.png").convert_alpha()
 hint_sprites = [pygame.image.load(f"{SEMAPHORES_PATH}{chr(ord('A') + i)}.png").convert_alpha() for i in range(26)]
 hint_sprites = [pygame.transform.scale(img, (100, 100)) for img in hint_sprites]
@@ -100,6 +101,11 @@ class Missile:
 				# logging
 				self.gameplay.gameplay_logger.missile_hint_shown(self)
 				self.shown_hint_flag = True
+				
+				# Update BKT with incorrect when hint is shown
+				if hasattr(self.gameplay, 'spawner'):
+					if hasattr(self.gameplay.spawner, 'on_missile_hint_shown'):
+						self.gameplay.spawner.on_missile_hint_shown(self.letter)
 
 			hint_rect = self.hint_sprite.get_rect(
 				center=(self.x, self.y - self.sprite.get_height() // 2 - self.hint_sprite.get_height() // 2 - 10)

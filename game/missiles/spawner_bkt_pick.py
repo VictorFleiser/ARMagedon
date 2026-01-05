@@ -45,6 +45,7 @@ class BKTPickSpawner(MissileSpawner):
 		)
 		
 		self.timer = 0.0
+		self.letters_history = []
 	
 	def update(self, dt): # every frame
 		self.timer += dt
@@ -106,6 +107,8 @@ class BKTPickSpawner(MissileSpawner):
 			speed=speed,
 			hint_start=hint_start
 		)
+		self.letters_history.append(letter)
+		# print(f"Letters history: {self.letters_history}")
 	
 	def on_missile_destroyed_correct(self, letter):
 		self.bkt.update_correct(letter)
@@ -130,6 +133,16 @@ class BKTPickSpawner(MissileSpawner):
 			self.gameplay.gameplay_logger.bkt_update(
 				letter=letter,
 				outcome='incorrect',
+				p_k=self.bkt.get_knowledge(letter)
+			)
+	
+	def on_missile_hint_shown(self, letter):
+		"""Called when a hint is shown for a missile - update BKT with incorrect"""
+		self.bkt.update_incorrect(letter)
+		if hasattr(self.gameplay, 'gameplay_logger'):
+			self.gameplay.gameplay_logger.bkt_update(
+				letter=letter,
+				outcome='hint_shown',
 				p_k=self.bkt.get_knowledge(letter)
 			)
 	

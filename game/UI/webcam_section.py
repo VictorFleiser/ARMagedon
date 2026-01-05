@@ -276,12 +276,31 @@ class WebcamPanel:
             
         x, y, w, h = self.rect
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        frame = cv2.resize(frame, (w, h))
+        
+        # Calculate aspect ratio to avoid stretching
+        frame_height, frame_width = frame.shape[:2]
+        aspect_ratio = frame_width / frame_height
+        target_aspect_ratio = w / h
+        
+        if aspect_ratio > target_aspect_ratio:
+            # Frame is wider, fit to width
+            new_width = w
+            new_height = int(w / aspect_ratio)
+        else:
+            # Frame is taller, fit to height
+            new_height = h
+            new_width = int(h * aspect_ratio)
+        
+        frame = cv2.resize(frame, (new_width, new_height))
         
         frame_surface = pygame.surfarray.make_surface(np.rot90(frame))
         frame_surface = pygame.transform.flip(frame_surface, True, False)
         
-        surface.blit(frame_surface, (x, y))
+        # Center the frame in the rect
+        offset_x = x + (w - new_width) // 2
+        offset_y = y + (h - new_height) // 2
+        
+        surface.blit(frame_surface, (offset_x, offset_y))
 
     def __del__(self):
         self.holistic.close()

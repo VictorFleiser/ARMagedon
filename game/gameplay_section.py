@@ -187,11 +187,12 @@ class Gameplay:
         self.last_time = now
 
         for missile in self.missiles:
-            if missile.update(dt):
-                # missile hit the ground
-                if isinstance(self.spawner, BKTPickSpawner):
-                    self.spawner.on_missile_hit_ground(missile.letter)
-                break   # missile hit the ground; do not check for collisions (we already reset the map)
+            # if missile.update(dt):
+            #     # missile hit the ground
+            #     if isinstance(self.spawner, BKTPickSpawner):
+            #         self.spawner.on_missile_hit_ground(missile.letter)
+            #     break   # missile hit the ground; do not check for collisions (we already reset the map)
+            missile.update(dt)
             col, row = self.missile_grid_position(missile)
 
             if 0 <= row < self.grid_size and 0 <= col < self.grid_size:
@@ -203,8 +204,8 @@ class Gameplay:
                     self.buildings.grid[row+1][col] = 0 # remove damaged sprite above
                     missile.alive = False
                     # update BKT for building hit (miss)
-                    if isinstance(self.spawner, BKTPickSpawner):
-                        self.spawner.on_missile_hit_ground(missile.letter)
+                    # if isinstance(self.spawner, BKTPickSpawner): # removed score decrease for building hit
+                    #     self.spawner.on_missile_hit_ground(missile.letter)
                     # logging
                     self.gameplay_logger.missile_hit_ground(missile, (missile.y - missile.start_y) / missile.distance)
 
@@ -344,4 +345,4 @@ class Gameplay:
     def reset_buildings(self):
         # reapply initial building pattern
         self.buildings = BuildingGrid(self.grid_size, self.rect, self.building_pattern_path)
-
+    
