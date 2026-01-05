@@ -54,6 +54,7 @@ class Missile:
 		self.alive = True
 
 		self.shown_hint_flag = False	# to track when to send the missile_hint_shown log
+		self.bkt_updated_flag = False	# to track if BKT has been updated (either hint or miss)
 
 	# -------------------------------------------------------
 	def update(self, dt):
@@ -102,10 +103,12 @@ class Missile:
 				self.gameplay.gameplay_logger.missile_hint_shown(self)
 				self.shown_hint_flag = True
 				
-				# Update BKT with incorrect when hint is shown
-				if hasattr(self.gameplay, 'spawner'):
-					if hasattr(self.gameplay.spawner, 'on_missile_hint_shown'):
-						self.gameplay.spawner.on_missile_hint_shown(self.letter)
+				# Update BKT with incorrect when hint is shown (only if not already updated)
+				if not self.bkt_updated_flag:
+					if hasattr(self.gameplay, 'spawner'):
+						if hasattr(self.gameplay.spawner, 'on_missile_hint_shown'):
+							self.gameplay.spawner.on_missile_hint_shown(self.letter)
+							self.bkt_updated_flag = True
 
 			hint_rect = self.hint_sprite.get_rect(
 				center=(self.x, self.y - self.sprite.get_height() // 2 - self.hint_sprite.get_height() // 2 - 10)
