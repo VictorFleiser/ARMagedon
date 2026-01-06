@@ -93,16 +93,6 @@ class BKTModel:
 		self.success_score[letter] = max(0, self.success_score[letter] // 2)
 	
 	
-	# def update_decay(self, dt): # constant decay
-	# 	"""
-	# 	Applies exponential decay to knowledge based on time passed
-	# 	Formula: P(K)_new = P(K)_old * e^(-lambda * dt)
-	# 	"""
-	# 	decay_factor = math.exp(-self.base_decay_rate * dt)
-
-	# 	for letter in self.p_k:
-	# 		self.p_k[letter] = self.p_k[letter] * decay_factor
-
 	def update_decay(self, dt):
 		""" Adaptive exponential decay """
 		for letter in self.letters[:self.number_of_letters_tested]:

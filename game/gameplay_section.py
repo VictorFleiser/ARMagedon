@@ -59,8 +59,8 @@ class Gameplay:
                 'p_t': 0.1, # Transition/learning probability
                 'p_s': 0.1, # Slip probability
                 'p_g': 0.25, # Guess probability
-                'base_decay_rate': 0.03, # knowledge decay rate
-                'stability_factor': 0.5 # stability factor for decay adjustment
+                'base_decay_rate': 0.05, # knowledge decay rate
+                'stability_factor': 0.8 # stability factor for decay adjustment
             }
         )
 
@@ -348,6 +348,9 @@ class Gameplay:
             all_letters = self.spawner.available_letters
             tested_count = self.spawner.number_of_letters_tested
             
+            # Predict next selection probabilities
+            next_probs = self.spawner.get_selection_probabilities()
+            
             # Title
             title_surface = debug_font_small.render("Semaphore Knowledge:", True, (255, 255, 255))
             title_bg = pygame.Rect(x_offset - 2, y_offset - 2, title_surface.get_width() + 4, title_surface.get_height() + 4)
@@ -359,6 +362,7 @@ class Gameplay:
             for i, letter in enumerate(all_letters):
                 p_k = self.spawner.bkt.get_knowledge(letter)
                 s_s = self.spawner.bkt.success_score.get(letter, 0)
+                prob = next_probs.get(letter, 0.0)
                 
                 # Grey out letters not yet tested
                 if i >= tested_count:
@@ -366,7 +370,7 @@ class Gameplay:
                 else:
                     color = (255, 255, 255)
                 
-                text = f"{letter}: {p_k:.3f} (S: {s_s})"
+                text = f"{letter}: {p_k:.3f} (S: {s_s}) [P: {prob:.2f}]"
                 text_surface = debug_font_small.render(text, True, color)
                 text_bg = pygame.Rect(x_offset - 2, y_offset - 2, text_surface.get_width() + 4, text_surface.get_height() + 4)
                 self.draw_transparent_rect(surface, (0, 0, 0, 100), text_bg)

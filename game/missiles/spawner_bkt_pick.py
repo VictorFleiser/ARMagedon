@@ -3,6 +3,7 @@ BKT-based spawner that adaptively selects letters based on user knowledge.
 Focuses on letters the user knows least, and adjusts hint timing based on mastery.
 """
 import random
+import math
 from game.missiles.missile_spawner import MissileSpawner
 from game.missiles.bkt_model import BKTModel
 
@@ -52,6 +53,30 @@ class BKTPickSpawner(MissileSpawner):
 		self.timer = 0.0
 		self.letters_history = []
 	
+	def get_selection_probabilities(self):
+		"""Calculate probabilities used for selecting the next letter based on current state."""
+		free_letters = self.get_free_letters() # letters not on screen
+		if free_letters is None: return {}
+		free_letters = list(set(free_letters) & set(self.available_letters[:self.number_of_letters_tested]))
+		if not free_letters: return {}
+		
+		# Softmax selection over (1 - knowledge) to focus on weakness
+		temperature = 0.2
+		weights = []
+		for letter in free_letters:
+			p_k = self.bkt.get_knowledge(letter)
+			# We use (1-p_k) because we want lower knowledge to have higher weight
+			weight = math.exp((1.0 - p_k) / temperature)
+			weights.append(weight)
+		
+		sum_weights = sum(weights)
+		probs = [w / sum_weights for w in weights]
+		
+		result = {letter: 0.0 for letter in self.available_letters}
+		for letter, p in zip(free_letters, probs):
+			result[letter] = p
+		return result
+
 	def update(self, dt): # every frame
 		self.timer += dt
 
@@ -68,25 +93,18 @@ class BKTPickSpawner(MissileSpawner):
 			self.spawn_adaptive_missile()
 	
 	def select_letter_adaptive(self):
-		free_letters = self.get_free_letters() # letters not on screen
-		if free_letters is None: return None
-		free_letters = list(set(free_letters) & set(self.available_letters[:self.number_of_letters_tested]))
-		if not free_letters: return None
+		probs_dict = self.get_selection_probabilities()
+		if not probs_dict:
+			return None
 		
-		if random.random() < self.focus_weak_prob: # focus on weakness
-			# letter_knowledge = [(letter, self.bkt.get_knowledge(letter)) for letter in free_letters]
-			# letter_knowledge.sort(key=lambda x: x[1]) # weakest first
+		# Filter only those with non-zero probability (available and tested)
+		letters = [l for l, p in probs_dict.items() if p > 0]
+		weights = [p for l, p in probs_dict.items() if p > 0]
+		
+		if not letters:
+			return None
 			
-			# n_candidates = min(3, len(letter_knowledge)) # top 3 weakest
-			# candidates = [letter for letter, _ in letter_knowledge[:n_candidates]]
-			# letter = random.choice(candidates)
-			letter = random.choice(self.bkt.get_weakest_letters(n=2, all_letters=False))[0]
-			if letter not in free_letters:
-				letter = random.choice(free_letters)
-		else: # random pick
-			letter = random.choice(free_letters)
-		
-		return letter
+		return random.choices(letters, weights=weights, k=1)[0]
 	
 	def select_hint_timing(self, letter):
 		""" Show hints based on P(K): lower knowledge = earlier hints, higher = later """
