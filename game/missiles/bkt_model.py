@@ -8,6 +8,7 @@ BKT Parameters:
 - P(G): Guess probability (incorrect response despite knowing)
 - P(K): Current probability of knowing the letter (updated dynamically)
 """
+import math
 
 class BKTModel:
 	def __init__(
@@ -17,7 +18,9 @@ class BKTModel:
 		p_l0=0.0,
 		p_t=0.1,
 		p_s=0.1,
-		p_g=0.25
+		p_g=0.25,
+		base_decay_rate=0.03,
+		stability_factor=0.5
 	):
 		self.letters = letters
 		self.number_of_letters_tested = initial_number_of_letters_tested
@@ -25,9 +28,13 @@ class BKTModel:
 		self.p_t = p_t
 		self.p_s = p_s
 		self.p_g = p_g
+		self.base_decay_rate = base_decay_rate
+		self.stability_factor = stability_factor
 		
 		# Initialize knowledge probability for each letter
 		self.p_k = {letter: p_l0 for letter in letters}
+
+		self.success_score = {letter: 0 for letter in letters}
 	
 	def update_correct(self, letter):
 		if letter not in self.p_k:
@@ -54,6 +61,8 @@ class BKTModel:
 		# learning: P(K) = P(K | correct) + (1 - P(K | correct)) * P(T)
 		self.p_k[letter] = p_k_after_evidence + (1 - p_k_after_evidence) * self.p_t
 		self.p_k[letter] = max(0.0, min(1.0, self.p_k[letter]))
+
+		self.success_score[letter] += 1
 	
 	def update_incorrect(self, letter):
 		if letter not in self.p_k:
@@ -80,6 +89,36 @@ class BKTModel:
 		# learning: P(K) = P(K | incorrect) + (1 - P(K | incorrect)) * P(T)
 		self.p_k[letter] = p_k_after_evidence + (1 - p_k_after_evidence) * self.p_t
 		self.p_k[letter] = max(0.0, min(1.0, self.p_k[letter]))
+
+		self.success_score[letter] = max(0, self.success_score[letter] // 2)
+	
+	
+	# def update_decay(self, dt): # constant decay
+	# 	"""
+	# 	Applies exponential decay to knowledge based on time passed
+	# 	Formula: P(K)_new = P(K)_old * e^(-lambda * dt)
+	# 	"""
+	# 	decay_factor = math.exp(-self.base_decay_rate * dt)
+
+	# 	for letter in self.p_k:
+	# 		self.p_k[letter] = self.p_k[letter] * decay_factor
+
+	def update_decay(self, dt):
+		""" Adaptive exponential decay """
+		for letter in self.letters[:self.number_of_letters_tested]:
+			# Calculate dynamic decay rate based on stability
+			# rate = base / (1 + factor * success_count)
+			stability = self.success_score.get(letter, 0)
+
+			effective_decay = self.base_decay_rate / (1.0 + (self.stability_factor * stability))
+			# Example with base=0.05, factor=0.5:
+			# 0 successes: rate = 0.05 (Fast)
+			# 1 success:   rate = 0.033
+			# 5 successes: rate = 0.014 (Slow)
+
+			decay_multiplier = math.exp(-effective_decay * dt)
+			self.p_k[letter] = self.p_k[letter] * decay_multiplier
+
 	
 	def get_knowledge(self, letter):
 		return self.p_k.get(letter, self.p_l0)

@@ -37,13 +37,16 @@ class BKTPickSpawner(MissileSpawner):
 		# init BKT model
 		if bkt_params is None:
 			bkt_params = {}
+		
 		self.bkt = BKTModel(
 			letters=available_letters,
 			initial_number_of_letters_tested=initial_number_of_letters_tested,
 			p_l0=bkt_params.get('p_l0', 0.0), # 0 in theory
 			p_t=bkt_params.get('p_t', 0.1),
 			p_s=bkt_params.get('p_s', 0.1),
-			p_g=bkt_params.get('p_g', 0.25)
+			p_g=bkt_params.get('p_g', 0.25),
+			base_decay_rate=bkt_params.get('base_decay_rate', 0.02),
+            stability_factor=bkt_params.get('stability_factor', 0.5)
 		)
 		
 		self.timer = 0.0
@@ -51,6 +54,8 @@ class BKTPickSpawner(MissileSpawner):
 	
 	def update(self, dt): # every frame
 		self.timer += dt
+
+		self.bkt.update_decay(dt)
 
 		if self.bkt.get_lowest_overall_knowledge() >= self.overall_knowledge_threshold:
 			# increase letter pool if possible

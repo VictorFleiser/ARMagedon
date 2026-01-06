@@ -58,7 +58,9 @@ class Gameplay:
                 'p_l0': 0.0, # Initial probability of knowing
                 'p_t': 0.1, # Transition/learning probability
                 'p_s': 0.1, # Slip probability
-                'p_g': 0.25 # Guess probability
+                'p_g': 0.25, # Guess probability
+                'base_decay_rate': 0.03, # knowledge decay rate
+                'stability_factor': 0.5 # stability factor for decay adjustment
             }
         )
 
@@ -257,6 +259,13 @@ class Gameplay:
     # -------------------------------------------------------
     #                GAMEPLAY VISUAL VIEW
     # -------------------------------------------------------
+    def draw_transparent_rect(self, surface, color, rect):
+        """Draws a semi-transparent rectangle on the given surface."""
+        # color should be (R, G, B, A)
+        shape_surf = pygame.Surface(pygame.Rect(rect).size, pygame.SRCALPHA)
+        pygame.draw.rect(shape_surf, color, shape_surf.get_rect())
+        surface.blit(shape_surf, rect)
+
     def draw_gameplay(self, surface, debug_mode=False):
         # --- Background ---
         bg = pygame.transform.smoothscale(
@@ -303,12 +312,13 @@ class Gameplay:
                 
                 if isinstance(self.spawner, BKTPickSpawner):
                     p_k = self.spawner.bkt.get_knowledge(missile.letter)
+                    s_s = self.spawner.bkt.success_score.get(missile.letter, 0)
                     p_l0 = self.spawner.bkt.p_l0
                     p_t = self.spawner.bkt.p_t
                     p_s = self.spawner.bkt.p_s
                     p_g = self.spawner.bkt.p_g
                     debug_lines.extend([
-                        f"P(K): {p_k:.2f}",
+                        f"P(K): {p_k:.2f} (S: {s_s})",
                         f"P(L0): {p_l0:.2f}",
                         f"P(T): {p_t:.2f}",
                         f"P(S): {p_s:.2f}",
@@ -324,7 +334,7 @@ class Gameplay:
                         text_rect = text_surface.get_rect(center=(missile.x, text_y))
                         # Draw background for readability
                         bg_rect = text_rect.inflate(4, 2)
-                        pygame.draw.rect(surface, (0, 0, 0, 180), bg_rect)
+                        self.draw_transparent_rect(surface, (0, 0, 0, 100), bg_rect)
                         surface.blit(text_surface, text_rect)
                         text_y += 16
 
@@ -341,13 +351,14 @@ class Gameplay:
             # Title
             title_surface = debug_font_small.render("Semaphore Knowledge:", True, (255, 255, 255))
             title_bg = pygame.Rect(x_offset - 2, y_offset - 2, title_surface.get_width() + 4, title_surface.get_height() + 4)
-            pygame.draw.rect(surface, (0, 0, 0, 200), title_bg)
+            self.draw_transparent_rect(surface, (0, 0, 0, 120), title_bg)
             surface.blit(title_surface, (x_offset, y_offset))
             y_offset += 18
             
             # List all letters
             for i, letter in enumerate(all_letters):
                 p_k = self.spawner.bkt.get_knowledge(letter)
+                s_s = self.spawner.bkt.success_score.get(letter, 0)
                 
                 # Grey out letters not yet tested
                 if i >= tested_count:
@@ -355,10 +366,10 @@ class Gameplay:
                 else:
                     color = (255, 255, 255)
                 
-                text = f"{letter}: {p_k:.3f}"
+                text = f"{letter}: {p_k:.3f} (S: {s_s})"
                 text_surface = debug_font_small.render(text, True, color)
                 text_bg = pygame.Rect(x_offset - 2, y_offset - 2, text_surface.get_width() + 4, text_surface.get_height() + 4)
-                pygame.draw.rect(surface, (0, 0, 0, 180), text_bg)
+                self.draw_transparent_rect(surface, (0, 0, 0, 100), text_bg)
                 surface.blit(text_surface, (x_offset, y_offset))
                 y_offset += 14
 
@@ -368,6 +379,19 @@ class Gameplay:
 
         # --- Buildings ---
         self.buildings.draw(surface)
+
+        # --- Shortcuts info (bottom left) ---
+        shortcut_font = pygame.font.SysFont("Arial", 12)
+        shortcut_text = "D: Debug | P: Profiler"
+        shortcut_surface = shortcut_font.render(shortcut_text, True, (200, 200, 200))
+        
+        # Position at bottom-left corner
+        sx = self.rect.left + 10
+        sy = self.rect.bottom - shortcut_surface.get_height() - 10
+        
+        shortcut_bg = pygame.Rect(sx - 4, sy - 2, shortcut_surface.get_width() + 8, shortcut_surface.get_height() + 4)
+        self.draw_transparent_rect(surface, (0, 0, 0, 100), shortcut_bg)
+        surface.blit(shortcut_surface, (sx, sy))
 
     # -------------------------------------------------------
     #                  Missile management

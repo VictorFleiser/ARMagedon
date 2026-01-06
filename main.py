@@ -51,7 +51,7 @@ gameplay_section.bonus_bar = bonus_section
 gameplay_section.semaphore_panel = semaphore_section
 
 # --- Debug mode ---
-debug_mode = False
+debug_mode = True
 profile_mode = False  # Press P to toggle performance profiling
 
 # --- Main loop ---
