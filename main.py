@@ -52,16 +52,17 @@ gameplay_section.semaphore_panel = semaphore_section
 
 # --- Debug mode ---
 debug_mode = False
+profile_mode = False  # Press P to toggle performance profiling
 
 # --- Main loop ---
 running = True
+frame_times = {}  # Store timing info
+
 while running:
+    loop_start = time.perf_counter()
+    
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            # print("Quitting game...")   # currently it just freezes and you have to force quit with ctlr+c, idk why
-            # cap.release()
-            # pygame.quit()
-            # exit()
             running = False
 
         elif event.type == GAMEOVER_EVENT:
@@ -80,19 +81,31 @@ while running:
             if event.key == pygame.K_d:
                 debug_mode = not debug_mode
                 print(f"Debug mode: {'ON' if debug_mode else 'OFF'}")
+            elif event.key == pygame.K_p:
+                profile_mode = not profile_mode
+                print(f"Performance profiling: {'ON' if profile_mode else 'OFF'}")
 
+    # Webcam update
+    t0 = time.perf_counter()
     frame, detected_semaphore = webcam_section.update()
+    if profile_mode:
+        frame_times['webcam_update'] = time.perf_counter() - t0
+    
     new_semaphore = detected_semaphore
     
     # Update dependent panels
+    t0 = time.perf_counter()
     semaphore_section.update_semaphore_detected(new_semaphore)
     bonus_section.update_semaphore_detected(new_semaphore)
 
     semaphore_section.update()
     bonus_section.update()
-    # frame = webcam_section.update()
     gameplay_section.update()
+    if profile_mode:
+        frame_times['updates'] = time.perf_counter() - t0
 
+    # Drawing
+    t0 = time.perf_counter()
     screen.fill(BLACK)
     gameplay_section.draw(screen, debug_mode=debug_mode)
     status_section.draw(screen)
@@ -101,13 +114,25 @@ while running:
     webcam_section.draw(screen, frame, debug_mode=debug_mode)
 
     pygame.display.flip()
+    if profile_mode:
+        frame_times['draw_flip'] = time.perf_counter() - t0
+    
     clock.tick(60)
+    
+    # Print timing info periodically when profiling
+    if profile_mode:
+        frame_times['total_loop'] = time.perf_counter() - loop_start
+        if pygame.time.get_ticks() % 1000 < 16:  # Print roughly every second
+            print(f"\n--- Frame Timing (ms) ---")
+            for key, value in frame_times.items():
+                print(f"{key:20s}: {value*1000:6.2f} ms")
+            fps = clock.get_fps()
+            print(f"{'FPS':20s}: {fps:6.1f}")
+            print("-" * 30)
 
-# cap.release()
-# pygame.quit()
 print("Initiating shutdown...")
-webcam_section.close()  # Close MediaPipe first
-cap.release()           # Release the Camera
-cv2.destroyAllWindows() # Close any hidden CV2 windows
-pygame.quit()           # Close Pygame
+webcam_section.close()
+cap.release()
+cv2.destroyAllWindows()
+pygame.quit()
 print("Shutdown complete.")
