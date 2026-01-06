@@ -18,6 +18,7 @@ class BKTPickSpawner(MissileSpawner):
 		hint_min=0.3, # where hint can appear
 		hint_max=0.8,
 		focus_weak_prob=0.8, # 80% chance to pick from weakest letters
+		ignore_correct_after_hint=True,
 		bkt_params=None # dict with BKT parameters (p_l0, p_t, p_s, p_g)
 	):
 		super().__init__(gameplay)
@@ -31,6 +32,7 @@ class BKTPickSpawner(MissileSpawner):
 		self.hint_min = hint_min
 		self.hint_max = hint_max
 		self.focus_weak_prob = focus_weak_prob
+		self.ignore_correct_after_hint = ignore_correct_after_hint
 		
 		# init BKT model
 		if bkt_params is None:

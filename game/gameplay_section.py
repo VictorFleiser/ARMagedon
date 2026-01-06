@@ -53,6 +53,7 @@ class Gameplay:
             hint_min=0.3,
             hint_max=0.8,
             focus_weak_prob=0.8,
+            ignore_correct_after_hint=True,
             bkt_params={
                 'p_l0': 0.0, # Initial probability of knowing
                 'p_t': 0.1, # Transition/learning probability
@@ -141,8 +142,11 @@ class Gameplay:
             if isinstance(self.spawner, BKTPickSpawner):
                 if bomb_used:
                     self.spawner.on_missile_destroyed_bomb(missile.letter)
+                elif self.spawner.ignore_correct_after_hint and missile.shown_hint_flag: # If hint was shown & toggle on, don't update BKT as 'correct'
+                    pass # nothing for now (maybe log later)
                 else:
                     self.spawner.on_missile_destroyed_correct(missile.letter)
+                    missile.bkt_updated_flag = True
             
             self.status_panel.gain_score(score)
             missile.alive = False
