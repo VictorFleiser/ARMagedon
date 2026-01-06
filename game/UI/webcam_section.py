@@ -345,5 +345,13 @@ class WebcamPanel:
         
         surface.blit(frame_surface, (offset_x, offset_y))
 
+    
+    def close(self):
+        """Explicitly release MediaPipe and any other resources"""
+        if self.holistic:
+            self.holistic.close()
+            self.holistic = None
+            print("MediaPipe Holistic closed.")
+
     def __del__(self):
-        self.holistic.close()
+        self.close()

@@ -58,10 +58,11 @@ running = True
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            print("Quitting game...")   # currently it just freezes and you have to force quit with ctlr+c, idk why
-            cap.release()
-            pygame.quit()
-            exit()
+            # print("Quitting game...")   # currently it just freezes and you have to force quit with ctlr+c, idk why
+            # cap.release()
+            # pygame.quit()
+            # exit()
+            running = False
 
         elif event.type == GAMEOVER_EVENT:
             gameplay_section.gameover()
@@ -79,17 +80,6 @@ while running:
             if event.key == pygame.K_d:
                 debug_mode = not debug_mode
                 print(f"Debug mode: {'ON' if debug_mode else 'OFF'}")
-
-    # # Test keyboard input
-    # keys = pygame.key.get_pressed()
-    # new_semaphore = "NONE"
-    # if keys[pygame.K_SPACE]:
-    #     new_semaphore = "SPACE"
-    # else:
-    #     for k in range(pygame.K_a, pygame.K_z + 1):
-    #         if keys[k]:
-    #             new_semaphore = chr(k).upper()
-    #             break
 
     frame, detected_semaphore = webcam_section.update()
     new_semaphore = detected_semaphore
@@ -113,5 +103,11 @@ while running:
     pygame.display.flip()
     clock.tick(60)
 
-cap.release()
-pygame.quit()
+# cap.release()
+# pygame.quit()
+print("Initiating shutdown...")
+webcam_section.close()  # Close MediaPipe first
+cap.release()           # Release the Camera
+cv2.destroyAllWindows() # Close any hidden CV2 windows
+pygame.quit()           # Close Pygame
+print("Shutdown complete.")
