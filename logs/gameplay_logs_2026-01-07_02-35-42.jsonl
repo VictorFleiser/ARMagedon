@@ -1,0 +1,162 @@
+{"timestamp": 1767749743.103924, "event": "semaphore_completed", "semaphore": "NONE"}
+{"timestamp": 1767749744.8432121, "event": "semaphore_completed", "semaphore": "S"}
+{"timestamp": 1767749746.081972, "event": "semaphore_completed", "semaphore": "V"}
+{"timestamp": 1767749746.5992541, "event": "missile_spawned", "missile_id": "834f9b44-ccb0-4e38-9402-da90224be81e", "letter": "E", "column": 8, "speed": 12.5, "hint_start": 0.3}
+{"timestamp": 1767749747.476285, "event": "semaphore_completed", "semaphore": "NONE"}
+{"timestamp": 1767749747.594244, "event": "bkt_state_snapshot", "all_p_k": {"E": 0.0}}
+{"timestamp": 1767749748.9537652, "event": "semaphore_completed", "semaphore": "E"}
+{"timestamp": 1767749748.953851, "event": "missile_destroyed", "missile_id": "834f9b44-ccb0-4e38-9402-da90224be81e", "progress": 0.18688000000000002, "score": 810, "bomb_used": false}
+{"timestamp": 1767749748.9539032, "event": "bkt_update", "letter": "E", "outcome": "correct", "p_k": 0.1, "base_decay_rate": 0.05, "stability_factor": 0.8}
+{"timestamp": 1767749748.953917, "event": "score_updated", "new_score": 810}
+{"timestamp": 1767749750.543402, "event": "semaphore_completed", "semaphore": "NONE"}
+{"timestamp": 1767749750.597249, "event": "missile_spawned", "missile_id": "aad958aa-15a8-475a-bb05-a5208659c64b", "letter": "E", "column": 7, "speed": 12.5, "hint_start": 0.3477428138820102}
+{"timestamp": 1767749752.655659, "event": "bkt_state_snapshot", "all_p_k": {"E": 0.09018012642199154}}
+{"timestamp": 1767749753.419667, "event": "semaphore_completed", "semaphore": "E"}
+{"timestamp": 1767749753.4197462, "event": "missile_destroyed", "missile_id": "aad958aa-15a8-475a-bb05-a5208659c64b", "progress": 0.22432, "score": 770, "bomb_used": false}
+{"timestamp": 1767749753.4197881, "event": "bkt_update", "letter": "E", "outcome": "correct", "p_k": 0.33274019382157843, "base_decay_rate": 0.05, "stability_factor": 0.8}
+{"timestamp": 1767749753.41982, "event": "score_updated", "new_score": 1580}
+{"timestamp": 1767749754.602858, "event": "missile_spawned", "missile_id": "dd8de093-3e9e-44ff-991d-4a40d0f965db", "letter": "E", "column": 3, "speed": 12.5, "hint_start": 0.4625716214943995}
+{"timestamp": 1767749756.088356, "event": "semaphore_completed", "semaphore": "CANCEL"}
+{"timestamp": 1767749757.6714199, "event": "bkt_state_snapshot", "all_p_k": {"E": 0.30650884165375464}}
+{"timestamp": 1767749757.954606, "event": "semaphore_completed", "semaphore": "E"}
+{"timestamp": 1767749757.9546812, "event": "missile_destroyed", "missile_id": "dd8de093-3e9e-44ff-991d-4a40d0f965db", "progress": 0.26671999999999996, "score": 730, "bomb_used": false}
+{"timestamp": 1767749757.954748, "event": "bkt_update", "letter": "E", "outcome": "correct", "p_k": 0.6510937455611198, "base_decay_rate": 0.05, "stability_factor": 0.8}
+{"timestamp": 1767749757.954763, "event": "score_updated", "new_score": 2310}
+{"timestamp": 1767749758.604893, "event": "missile_spawned", "missile_id": "4abe1987-eecf-4234-9762-636fbfef6485", "letter": "A", "column": 6, "speed": 12.5, "hint_start": 0.3}
+{"timestamp": 1767749759.28482, "event": "semaphore_completed", "semaphore": "NONE"}
+{"timestamp": 1767749761.8603258, "event": "semaphore_completed", "semaphore": "A"}
+{"timestamp": 1767749761.860397, "event": "missile_destroyed", "missile_id": "4abe1987-eecf-4234-9762-636fbfef6485", "progress": 0.25904, "score": 740, "bomb_used": false}
+{"timestamp": 1767749761.860432, "event": "bkt_update", "letter": "A", "outcome": "correct", "p_k": 0.1, "base_decay_rate": 0.05, "stability_factor": 0.8}
+{"timestamp": 1767749761.860445, "event": "score_updated", "new_score": 3050}
+{"timestamp": 1767749762.565349, "event": "missile_spawned", "missile_id": "0d384a1e-062d-4f5b-b3cb-90835f1b69dc", "letter": "A", "column": 3, "speed": 12.5, "hint_start": 0.34900584967436765}
+{"timestamp": 1767749762.700015, "event": "bkt_state_snapshot", "all_p_k": {"E": 0.60704007525062, "A": 0.09764484376031463}}
+{"timestamp": 1767749763.1203468, "event": "semaphore_completed", "semaphore": "NONE"}
+{"timestamp": 1767749766.060522, "event": "semaphore_completed", "semaphore": "A"}
+{"timestamp": 1767749766.0606248, "event": "missile_destroyed", "missile_id": "0d384a1e-062d-4f5b-b3cb-90835f1b69dc", "progress": 0.2781600000000001, "score": 720, "bomb_used": false}
+{"timestamp": 1767749766.060663, "event": "bkt_update", "letter": "A", "outcome": "correct", "p_k": 0.3341472237930816, "base_decay_rate": 0.05, "stability_factor": 0.8}
+{"timestamp": 1767749766.0606751, "event": "score_updated", "new_score": 3770}
+{"timestamp": 1767749766.573497, "event": "missile_spawned", "missile_id": "3d1e3122-c25a-4c0e-81a5-f8f086a21dd5", "letter": "A", "column": 6, "speed": 12.5, "hint_start": 0.4653762145516106}
+{"timestamp": 1767749767.389449, "event": "semaphore_completed", "semaphore": "NONE"}
+{"timestamp": 1767749767.707886, "event": "bkt_state_snapshot", "all_p_k": {"E": 0.5639482307127051, "A": 0.3236175621525927}}
+{"timestamp": 1767749769.796982, "event": "semaphore_completed", "semaphore": "A"}
+{"timestamp": 1767749769.797049, "event": "missile_destroyed", "missile_id": "3d1e3122-c25a-4c0e-81a5-f8f086a21dd5", "progress": 0.25648, "score": 740, "bomb_used": false}
+{"timestamp": 1767749769.797085, "event": "bkt_update", "letter": "A", "outcome": "correct", "p_k": 0.657114517963099, "base_decay_rate": 0.05, "stability_factor": 0.8}
+{"timestamp": 1767749769.797097, "event": "score_updated", "new_score": 4510}
+{"timestamp": 1767749770.573843, "event": "missile_spawned", "missile_id": "11241d12-8e48-4db4-a754-f22c0932e2a8", "letter": "I", "column": 7, "speed": 12.5, "hint_start": 0.3}
+{"timestamp": 1767749771.124388, "event": "semaphore_completed", "semaphore": "NONE"}
+{"timestamp": 1767749772.7183518, "event": "bkt_state_snapshot", "all_p_k": {"E": 0.5238845215423326, "A": 0.6293186457335714, "I": 0.0}}
+{"timestamp": 1767749774.387108, "event": "missile_hint_shown", "missile_id": "11241d12-8e48-4db4-a754-f22c0932e2a8"}
+{"timestamp": 1767749774.387636, "event": "bkt_update", "letter": "I", "outcome": "hint_shown", "p_k": 0.1, "base_decay_rate": 0.05, "stability_factor": 0.8}
+{"timestamp": 1767749774.579537, "event": "missile_spawned", "missile_id": "84a9f07e-16a3-4c77-85d9-85cc0e1bbfc6", "letter": "A", "column": 2, "speed": 12.5, "hint_start": 0.6061646079513847}
+{"timestamp": 1767749775.2018108, "event": "semaphore_completed", "semaphore": "I"}
+{"timestamp": 1767749775.2018812, "event": "missile_destroyed", "missile_id": "11241d12-8e48-4db4-a754-f22c0932e2a8", "progress": 0.36880000000000007, "score": 63, "bomb_used": false}
+{"timestamp": 1767749775.201896, "event": "score_updated", "new_score": 4573}
+{"timestamp": 1767749776.46309, "event": "semaphore_completed", "semaphore": "NONE"}
+{"timestamp": 1767749777.7856672, "event": "bkt_state_snapshot", "all_p_k": {"E": 0.4862663774106877, "A": 0.5841296803290573, "I": 0.08433695855790169}}
+{"timestamp": 1767749778.0023549, "event": "semaphore_completed", "semaphore": "A"}
+{"timestamp": 1767749778.002429, "event": "missile_destroyed", "missile_id": "84a9f07e-16a3-4c77-85d9-85cc0e1bbfc6", "progress": 0.2724, "score": 720, "bomb_used": false}
+{"timestamp": 1767749778.002471, "event": "bkt_update", "letter": "A", "outcome": "correct", "p_k": 0.8505271193515558, "base_decay_rate": 0.05, "stability_factor": 0.8}
+{"timestamp": 1767749778.002484, "event": "score_updated", "new_score": 5293}
+{"timestamp": 1767749778.578686, "event": "missile_spawned", "missile_id": "64cdbea4-d79f-4e29-bb44-a8dea30ee972", "letter": "I", "column": 9, "speed": 12.5, "hint_start": 0.34052921229850935}
+{"timestamp": 1767749778.994804, "event": "semaphore_completed", "semaphore": "NONE"}
+{"timestamp": 1767749781.402496, "event": "semaphore_completed", "semaphore": "I"}
+{"timestamp": 1767749781.402567, "event": "missile_destroyed", "missile_id": "64cdbea4-d79f-4e29-bb44-a8dea30ee972", "progress": 0.22448, "score": 770, "bomb_used": false}
+{"timestamp": 1767749781.4026082, "event": "bkt_update", "letter": "I", "outcome": "correct", "p_k": 0.2929153237392341, "base_decay_rate": 0.05, "stability_factor": 0.8}
+{"timestamp": 1767749781.402621, "event": "score_updated", "new_score": 6063}
+{"timestamp": 1767749782.577256, "event": "missile_spawned", "missile_id": "4c1abce6-9f6a-4a3f-ab4c-097b47f4f0f3", "letter": "I", "column": 0, "speed": 12.5, "hint_start": 0.4416837555401143}
+{"timestamp": 1767749782.594482, "event": "semaphore_completed", "semaphore": "NONE"}
+{"timestamp": 1767749782.785311, "event": "bkt_state_snapshot", "all_p_k": {"E": 0.4517943794699711, "A": 0.8032785462367448, "I": 0.2817349972642652}}
+{"timestamp": 1767749785.936768, "event": "semaphore_completed", "semaphore": "I"}
+{"timestamp": 1767749785.936838, "event": "missile_destroyed", "missile_id": "4c1abce6-9f6a-4a3f-ab4c-097b47f4f0f3", "progress": 0.26728, "score": 730, "bomb_used": false}
+{"timestamp": 1767749785.936876, "event": "bkt_update", "letter": "I", "outcome": "correct", "p_k": 0.6006045740491363, "base_decay_rate": 0.05, "stability_factor": 0.8}
+{"timestamp": 1767749785.936887, "event": "score_updated", "new_score": 6793}
+{"timestamp": 1767749786.58687, "event": "missile_spawned", "missile_id": "93a9aea2-fc03-441a-bbd7-5df880447a7f", "letter": "E", "column": 7, "speed": 12.5, "hint_start": 0.5136134809988944}
+{"timestamp": 1767749787.202901, "event": "semaphore_completed", "semaphore": "NONE"}
+{"timestamp": 1767749787.851679, "event": "bkt_state_snapshot", "all_p_k": {"E": 0.4193589197618671, "A": 0.7562651271409937, "I": 0.5786881285639421}}
+{"timestamp": 1767749789.8088331, "event": "semaphore_completed", "semaphore": "E"}
+{"timestamp": 1767749789.808904, "event": "missile_destroyed", "missile_id": "93a9aea2-fc03-441a-bbd7-5df880447a7f", "progress": 0.25624, "score": 740, "bomb_used": false}
+{"timestamp": 1767749789.808939, "event": "bkt_update", "letter": "E", "outcome": "correct", "p_k": 0.7411313234647894, "base_decay_rate": 0.05, "stability_factor": 0.8}
+{"timestamp": 1767749789.8089511, "event": "score_updated", "new_score": 7533}
+{"timestamp": 1767749790.5857909, "event": "missile_spawned", "missile_id": "9b8d89a0-53e5-4ab7-9067-eaee45c6d896", "letter": "S", "column": 6, "speed": 12.5, "hint_start": 0.3}
+{"timestamp": 1767749791.138782, "event": "semaphore_completed", "semaphore": "NONE"}
+{"timestamp": 1767749792.859745, "event": "bkt_state_snapshot", "all_p_k": {"E": 0.7145337379324375, "A": 0.7124865676863849, "I": 0.5255455002865961, "S": 0.0}}
+{"timestamp": 1767749793.408729, "event": "semaphore_completed", "semaphore": "S"}
+{"timestamp": 1767749793.408894, "event": "missile_destroyed", "missile_id": "9b8d89a0-53e5-4ab7-9067-eaee45c6d896", "progress": 0.22432000000000002, "score": 770, "bomb_used": false}
+{"timestamp": 1767749793.408979, "event": "bkt_update", "letter": "S", "outcome": "correct", "p_k": 0.1, "base_decay_rate": 0.05, "stability_factor": 0.8}
+{"timestamp": 1767749793.409079, "event": "score_updated", "new_score": 8303}
+{"timestamp": 1767749794.590349, "event": "missile_spawned", "missile_id": "9f34a11b-c792-42a7-8636-b394842ec48c", "letter": "S", "column": 9, "speed": 12.5, "hint_start": 0.3483608050241003}
+{"timestamp": 1767749794.87325, "event": "semaphore_completed", "semaphore": "NONE"}
+{"timestamp": 1767749797.411069, "event": "semaphore_completed", "semaphore": "S"}
+{"timestamp": 1767749797.411159, "event": "missile_destroyed", "missile_id": "9f34a11b-c792-42a7-8636-b394842ec48c", "progress": 0.22424, "score": 770, "bomb_used": false}
+{"timestamp": 1767749797.41121, "event": "bkt_update", "letter": "S", "outcome": "correct", "p_k": 0.33518955493098307, "base_decay_rate": 0.05, "stability_factor": 0.8}
+{"timestamp": 1767749797.411225, "event": "score_updated", "new_score": 9073}
+{"timestamp": 1767749797.924979, "event": "bkt_state_snapshot", "all_p_k": {"E": 0.6727222876707326, "A": 0.6707949090487509, "I": 0.47676939491120646, "S": 0.33177779019344883}}
+{"timestamp": 1767749798.591807, "event": "missile_spawned", "missile_id": "a934e327-85de-45c6-b723-f71d27354834", "letter": "I", "column": 2, "speed": 12.5, "hint_start": 0.535346482410298}
+{"timestamp": 1767749799.4730828, "event": "semaphore_completed", "semaphore": "NONE"}
+{"timestamp": 1767749801.4088142, "event": "semaphore_completed", "semaphore": "I"}
+{"timestamp": 1767749801.408912, "event": "missile_destroyed", "missile_id": "a934e327-85de-45c6-b723-f71d27354834", "progress": 0.22392000000000004, "score": 770, "bomb_used": false}
+{"timestamp": 1767749801.40895, "event": "bkt_update", "letter": "I", "outcome": "correct", "p_k": 0.7691425413588772, "base_decay_rate": 0.05, "stability_factor": 0.8}
+{"timestamp": 1767749801.408962, "event": "score_updated", "new_score": 9843}
+{"timestamp": 1767749802.590396, "event": "missile_spawned", "missile_id": "b47d1df3-baab-43fc-aaa1-a206fe03c6ed", "letter": "S", "column": 6, "speed": 12.5, "hint_start": 0.45165477477973726}
+{"timestamp": 1767749802.924635, "event": "bkt_state_snapshot", "all_p_k": {"E": 0.6338477518893412, "A": 0.6320317505036699, "I": 0.7519858356297104, "S": 0.3013618167985162}}
+{"timestamp": 1767749803.072, "event": "semaphore_completed", "semaphore": "NONE"}
+{"timestamp": 1767749805.150662, "event": "semaphore_completed", "semaphore": "S"}
+{"timestamp": 1767749805.1507552, "event": "missile_destroyed", "missile_id": "b47d1df3-baab-43fc-aaa1-a206fe03c6ed", "progress": 0.20335999999999996, "score": 790, "bomb_used": false}
+{"timestamp": 1767749805.150796, "event": "bkt_update", "letter": "S", "outcome": "correct", "p_k": 0.6344650017966343, "base_decay_rate": 0.05, "stability_factor": 0.8}
+{"timestamp": 1767749805.150817, "event": "score_updated", "new_score": 10633}
+{"timestamp": 1767749806.593048, "event": "missile_spawned", "missile_id": "4d089468-380e-4651-95d4-7f1f583a7812", "letter": "N", "column": 6, "speed": 12.5, "hint_start": 0.3}
+{"timestamp": 1767749807.410822, "event": "semaphore_completed", "semaphore": "NONE"}
+{"timestamp": 1767749807.9575481, "event": "bkt_state_snapshot", "all_p_k": {"E": 0.5969850791052748, "A": 0.5952746908808957, "I": 0.6983376899714746, "S": 0.6086377744959706, "N": 0.0}}
+{"timestamp": 1767749810.374149, "event": "missile_hint_shown", "missile_id": "4d089468-380e-4651-95d4-7f1f583a7812"}
+{"timestamp": 1767749810.374243, "event": "bkt_update", "letter": "N", "outcome": "hint_shown", "p_k": 0.1, "base_decay_rate": 0.05, "stability_factor": 0.8}
+{"timestamp": 1767749810.5614889, "event": "missile_spawned", "missile_id": "554115c8-086c-4696-afdf-5cb0a7f2b474", "letter": "I", "column": 8, "speed": 12.5, "hint_start": 0.636050512701232}
+{"timestamp": 1767749812.964533, "event": "bkt_state_snapshot", "all_p_k": {"E": 0.5624402898687246, "A": 0.5608288739684317, "I": 0.6487649180934507, "S": 0.565432514369356, "N": 0.08780954309205621}}
+{"timestamp": 1767749814.563068, "event": "missile_spawned", "missile_id": "89821914-9253-4a20-9783-2c7515d1a7a2", "letter": "E", "column": 3, "speed": 12.5, "hint_start": 0.5759208328346787}
+{"timestamp": 1767749815.7892082, "event": "semaphore_completed", "semaphore": "N"}
+{"timestamp": 1767749815.789279, "event": "missile_destroyed", "missile_id": "4d089468-380e-4651-95d4-7f1f583a7812", "progress": 0.7340799999999998, "score": 26, "bomb_used": false}
+{"timestamp": 1767749815.7892952, "event": "score_updated", "new_score": 10659}
+{"timestamp": 1767749817.96689, "event": "bkt_state_snapshot", "all_p_k": {"E": 0.5299259914658089, "A": 0.5284077304450242, "I": 0.6027554782746446, "S": 0.5253328842630842, "N": 0.06837930264906285}}
+{"timestamp": 1767749818.525771, "event": "semaphore_completed", "semaphore": "I"}
+{"timestamp": 1767749818.5258439, "event": "missile_destroyed", "missile_id": "554115c8-086c-4696-afdf-5cb0a7f2b474", "progress": 0.63568, "score": 360, "bomb_used": false}
+{"timestamp": 1767749818.525882, "event": "bkt_update", "letter": "I", "outcome": "correct", "p_k": 0.8583738192162232, "base_decay_rate": 0.05, "stability_factor": 0.8}
+{"timestamp": 1767749818.5258949, "event": "score_updated", "new_score": 11019}
+{"timestamp": 1767749818.5724218, "event": "missile_spawned", "missile_id": "65e7bd5d-8705-49d7-94d8-bfc5e2335d0a", "letter": "N", "column": 0, "speed": 12.5, "hint_start": 0.33316924215606036}
+{"timestamp": 1767749821.584224, "event": "semaphore_completed", "semaphore": "NONE"}
+{"timestamp": 1767749821.776583, "event": "missile_hint_shown", "missile_id": "89821914-9253-4a20-9783-2c7515d1a7a2"}
+{"timestamp": 1767749821.776705, "event": "bkt_update", "letter": "E", "outcome": "hint_shown", "p_k": 0.2083309698124431, "base_decay_rate": 0.05, "stability_factor": 0.8}
+{"timestamp": 1767749822.57136, "event": "missile_spawned", "missile_id": "cd4177e8-e23e-4398-b095-e5f1946c76aa", "letter": "S", "column": 6, "speed": 12.5, "hint_start": 0.545467451531422}
+{"timestamp": 1767749822.590763, "event": "semaphore_completed", "semaphore": "E"}
+{"timestamp": 1767749822.5908191, "event": "missile_destroyed", "missile_id": "89821914-9253-4a20-9783-2c7515d1a7a2", "progress": 0.64072, "score": 35, "bomb_used": false}
+{"timestamp": 1767749822.5908291, "event": "score_updated", "new_score": 11054}
+{"timestamp": 1767749822.7791831, "event": "missile_hint_shown", "missile_id": "65e7bd5d-8705-49d7-94d8-bfc5e2335d0a"}
+{"timestamp": 1767749822.77926, "event": "bkt_update", "letter": "N", "outcome": "hint_shown", "p_k": 0.10676923499804089, "base_decay_rate": 0.05, "stability_factor": 0.8}
+{"timestamp": 1767749822.971006, "event": "bkt_state_snapshot", "all_p_k": {"E": 0.20356272125492242, "A": 0.4978489779382633, "I": 0.813957976668325, "S": 0.48806270508545857, "N": 0.10570157814829965}}
+{"timestamp": 1767749826.518795, "event": "semaphore_completed", "semaphore": "NONE"}
+{"timestamp": 1767749826.565181, "event": "missile_spawned", "missile_id": "457fe369-62e9-437e-a414-ecf1e02136c4", "letter": "A", "column": 4, "speed": 12.5, "hint_start": 0.5384987046400818}
+{"timestamp": 1767749827.972645, "event": "missile_hit_ground", "missile_id": "65e7bd5d-8705-49d7-94d8-bfc5e2335d0a", "progress": 0.7519999999999998}
+{"timestamp": 1767749827.972708, "event": "bkt_state_snapshot", "all_p_k": {"E": 0.18489384734490238, "A": 0.4690686602408071, "I": 0.7669036083779514, "S": 0.4534500263921904, "N": 0.08231224019818435}}
+{"timestamp": 1767749828.657377, "event": "semaphore_completed", "semaphore": "E"}
+{"timestamp": 1767749829.4482229, "event": "missile_hint_shown", "missile_id": "cd4177e8-e23e-4398-b095-e5f1946c76aa"}
+{"timestamp": 1767749829.448311, "event": "bkt_update", "letter": "S", "outcome": "hint_shown", "p_k": 0.18653586944763445, "base_decay_rate": 0.05, "stability_factor": 0.8}
+{"timestamp": 1767749829.5961542, "event": "semaphore_completed", "semaphore": "S"}
+{"timestamp": 1767749829.596216, "event": "missile_destroyed", "missile_id": "cd4177e8-e23e-4398-b095-e5f1946c76aa", "progress": 0.5604800000000002, "score": 43, "bomb_used": false}
+{"timestamp": 1767749829.5962298, "event": "score_updated", "new_score": 11097}
+{"timestamp": 1767749830.573979, "event": "missile_spawned", "missile_id": "4e70fa8c-d9c6-4573-ae45-af891dbb8913", "letter": "S", "column": 1, "speed": 12.5, "hint_start": 0.39037327487088364}
+{"timestamp": 1767749831.528307, "event": "semaphore_completed", "semaphore": "A"}
+{"timestamp": 1767749831.528372, "event": "missile_destroyed", "missile_id": "457fe369-62e9-437e-a414-ecf1e02136c4", "progress": 0.39560000000000006, "score": 600, "bomb_used": false}
+{"timestamp": 1767749831.528406, "event": "bkt_update", "letter": "A", "outcome": "correct", "p_k": 0.7717018957450292, "base_decay_rate": 0.05, "stability_factor": 0.8}
+{"timestamp": 1767749831.528418, "event": "score_updated", "new_score": 11697}
+{"timestamp": 1767749832.974893, "event": "bkt_state_snapshot", "all_p_k": {"E": 0.16793710840202994, "A": 0.7604788723441698, "I": 0.7225694217660827, "S": 0.16908496293402828, "N": 0.06409842695950885}}
+{"timestamp": 1767749833.523116, "event": "semaphore_completed", "semaphore": "S"}
+{"timestamp": 1767749833.52319, "event": "missile_destroyed", "missile_id": "4e70fa8c-d9c6-4573-ae45-af891dbb8913", "progress": 0.23448, "score": 760, "bomb_used": false}
+{"timestamp": 1767749833.523225, "event": "bkt_update", "letter": "S", "outcome": "correct", "p_k": 0.4766609472307238, "base_decay_rate": 0.05, "stability_factor": 0.8}
+{"timestamp": 1767749833.523238, "event": "score_updated", "new_score": 12457}
+{"timestamp": 1767749834.5725288, "event": "missile_spawned", "missile_id": "228f9f68-50cb-491d-b9c1-da3af2b0e21f", "letter": "N", "column": 4, "speed": 12.5, "hint_start": 0.3295881115152121}
+{"timestamp": 1767749835.122467, "event": "semaphore_completed", "semaphore": "NONE"}
+{"timestamp": 1767749836.7949739, "event": "semaphore_completed", "semaphore": "N"}
+{"timestamp": 1767749836.795038, "event": "missile_destroyed", "missile_id": "228f9f68-50cb-491d-b9c1-da3af2b0e21f", "progress": 0.17632, "score": 820, "bomb_used": false}
+{"timestamp": 1767749836.795072, "event": "bkt_update", "letter": "N", "outcome": "correct", "p_k": 0.25092653563853823, "base_decay_rate": 0.05, "stability_factor": 0.8}
+{"timestamp": 1767749836.795083, "event": "score_updated", "new_score": 13277}
+{"timestamp": 1767749837.978386, "event": "bkt_state_snapshot", "all_p_k": {"E": 0.15252961674179696, "A": 0.7233609450683982, "I": 0.6807819556551942, "S": 0.4373645133912931, "N": 0.24268670233866824}}
+{"timestamp": 1767749838.575119, "event": "missile_spawned", "missile_id": "1e403b8a-5747-429b-ada9-a131695f935d", "letter": "E", "column": 1, "speed": 12.5, "hint_start": 0.37539423668422306}
+{"timestamp": 1767749838.925698, "event": "semaphore_completed", "semaphore": "NONE"}

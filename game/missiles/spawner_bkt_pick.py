@@ -141,7 +141,9 @@ class BKTPickSpawner(MissileSpawner):
 			self.gameplay.gameplay_logger.bkt_update(
 				letter=letter,
 				outcome='correct',
-				p_k=self.bkt.get_knowledge(letter)
+				p_k=self.bkt.get_knowledge(letter),
+				base_decay_rate=self.bkt.base_decay_rate,
+				stability_factor=self.bkt.stability_factor
 			)
 	
 	def on_missile_destroyed_bomb(self, letter): # we can ignore for now
@@ -149,7 +151,9 @@ class BKTPickSpawner(MissileSpawner):
 			self.gameplay.gameplay_logger.bkt_update(
 				letter=letter,
 				outcome='bomb_ignore',
-				p_k=self.bkt.get_knowledge(letter)
+				p_k=self.bkt.get_knowledge(letter),
+				base_decay_rate=self.bkt.base_decay_rate,
+				stability_factor=self.bkt.stability_factor
 			)
 	
 	def on_missile_hit_ground(self, letter):
@@ -158,7 +162,9 @@ class BKTPickSpawner(MissileSpawner):
 			self.gameplay.gameplay_logger.bkt_update(
 				letter=letter,
 				outcome='incorrect',
-				p_k=self.bkt.get_knowledge(letter)
+				p_k=self.bkt.get_knowledge(letter),
+				base_decay_rate=self.bkt.base_decay_rate,
+				stability_factor=self.bkt.stability_factor
 			)
 	
 	def on_missile_hint_shown(self, letter):
@@ -168,7 +174,9 @@ class BKTPickSpawner(MissileSpawner):
 			self.gameplay.gameplay_logger.bkt_update(
 				letter=letter,
 				outcome='hint_shown',
-				p_k=self.bkt.get_knowledge(letter)
+				p_k=self.bkt.get_knowledge(letter),
+				base_decay_rate=self.bkt.base_decay_rate,
+				stability_factor=self.bkt.stability_factor
 			)
 	
 	def get_bkt_state(self):

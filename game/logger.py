@@ -98,15 +98,19 @@ class GameplayLogger(BaseLogger):
 		)
 
 	# -- BKT --
-	def bkt_update(self, letter, outcome, p_k, verbose=True):
+	def bkt_update(self, letter, outcome, p_k, base_decay_rate=None, stability_factor=None, verbose=True):
 		# outcome: 'correct', 'incorrect', or 'bomb_ignore'
 		if verbose: print(f"[BKT] Letter '{letter}' - Outcome: {outcome:12s} - P(K): {p_k:.4f}")
-		self.log(
-			"bkt_update",
-			letter=letter,
-			outcome=outcome,
-			p_k=p_k
-		)
+		log_data = {
+			"letter": letter,
+			"outcome": outcome,
+			"p_k": p_k
+		}
+		if base_decay_rate is not None:
+			log_data["base_decay_rate"] = base_decay_rate
+		if stability_factor is not None:
+			log_data["stability_factor"] = stability_factor
+		self.log("bkt_update", **log_data)
 	
 	def bkt_state_snapshot(self, all_p_k, verbose=False):
 		# visual and useful for debugging, i'll leave it here
