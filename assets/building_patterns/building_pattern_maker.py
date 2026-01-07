@@ -6,8 +6,8 @@ from PIL import Image
 # THIS CODE IS NOT USED IN THE GAME, IT IS ONLY A TOOL TO CREATE BUILDING PATTERNS
 # it takes an image, a grid size, a building grid, and generates the sprites and pattern file
 
-INPUT_IMAGE_PATH = "assets/building_patterns/building_pattern_2/city.png"
-OUTPUT_FOLDER = "assets/building_patterns/building_pattern_2"
+INPUT_IMAGE_PATH = "assets/building_patterns/building_pattern_1/protection_grid.png"
+OUTPUT_FOLDER = "assets/building_patterns/building_pattern_1"
 GRID_SIZE = 10  # 10x10 grid
 GRID = [
 	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
