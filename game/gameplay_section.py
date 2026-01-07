@@ -38,7 +38,7 @@ class Gameplay:
         ]
 
         # --- Buildings ---
-        self.building_pattern_path = "assets/building_patterns/building_pattern_2"
+        self.building_pattern_path = "assets/building_patterns/building_pattern_1"
         self.buildings = BuildingGrid(self.grid_size, self.rect, self.building_pattern_path)
 
         # self.spawner = RandomPickSpawner(gameplay=self, available_letters=["A", "E", "I", "O", "U"])
@@ -275,26 +275,27 @@ class Gameplay:
         surface.blit(bg, self.rect.topleft)
 
         # --- Grid overlay (visible for now) ---
-        for row in range(self.grid_size):
-            for col in range(self.grid_size):
-                cell_x = self.grid_origin[0] + col * self.cell_size
-                # cell_y = self.grid_origin[1] + row * self.cell_size
-                cell_y = self.grid_origin[1] + (self.grid_size - 1 - row) * self.cell_size
+        if debug_mode:
+            for row in range(self.grid_size):
+                for col in range(self.grid_size):
+                    cell_x = self.grid_origin[0] + col * self.cell_size
+                    # cell_y = self.grid_origin[1] + row * self.cell_size
+                    cell_y = self.grid_origin[1] + (self.grid_size - 1 - row) * self.cell_size
 
-                cell_rect = pygame.Rect(
-                    cell_x, cell_y,
-                    self.cell_size, self.cell_size
-                )
+                    cell_rect = pygame.Rect(
+                        cell_x, cell_y,
+                        self.cell_size, self.cell_size
+                    )
 
-                # Color based on state
-                if self.buildings.grid[row][col] == 0:
-                    color = (255, 255, 255, 40)
-                elif self.buildings.grid[row][col] == 1:
-                    color = (255, 200, 80, 100)
-                else:
-                    color = (255, 80, 80, 100)
+                    # Color based on state
+                    if self.buildings.grid[row][col] == 0:
+                        color = (255, 255, 255, 40)
+                    elif self.buildings.grid[row][col] == 1:
+                        color = (255, 200, 80, 100)
+                    else:
+                        color = (255, 80, 80, 100)
 
-                pygame.draw.rect(surface, color, cell_rect, 1)
+                    pygame.draw.rect(surface, color, cell_rect, 1)
         
         # --- Missiles ---
         for missile in self.missiles:

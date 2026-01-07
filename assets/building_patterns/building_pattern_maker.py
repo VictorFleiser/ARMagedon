@@ -18,7 +18,7 @@ GRID = [
 	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 ]
 DESTRUCTION_MASK_IMG_PATH = "assets/building_patterns/destruction_mask.png"
@@ -60,7 +60,9 @@ for row in range(GRID_SIZE):
 				cell_image.save(sprite_path)
 			else:
 				# Create damaged version : apply destruction mask to image
-				destruction_mask = Image.open(DESTRUCTION_MASK_IMG_PATH).resize((cell_width, cell_width)).convert("L")
+				destruction_mask = Image.new("L", (cell_width, cell_width), 0)	# empty mask
+				# destruction_mask = Image.open(DESTRUCTION_MASK_IMG_PATH).resize((cell_width, cell_width)).convert("L")
+				
 				damaged_image = cell_image.copy()
 				damaged_image.putalpha(destruction_mask)
 				damaged_image.save(sprite_path)
