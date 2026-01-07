@@ -71,13 +71,13 @@ SEMAPHORE_LETTERS = semaphores_mapping
 #     ('Left', 'High_Right'): 'Y',
 #     ('Low_Left', 'Left'): 'Z',
 #     ('Left', 'Low_Left'): 'Z',
-#     ('Down', 'Down'): 'SPACE', # Bomb
+#     ('Down', 'Down'): 'SPACE',
 #     # UNUSED COMBINATIONS :
 #     ('Low_Left', 'High_Right'): 'CANCEL',
 #     ('High_Right', 'Low_Left'): 'CANCEL',
 #     ('High_Left', 'Up'): 'NUMERIC',
 #     ('Up', 'High_Left'): 'NUMERIC',
-#     ('Up', 'Up'): 'unused_2',
+#     ('Up', 'Up'): 'BOMB',
 #     ('High_Right', 'High_Right'): 'unused_3',
 #     ('Right', 'Right'): 'unused_4',
 #     ('Low_Right', 'Low_Right'): 'unused_5',

@@ -36,7 +36,8 @@ semaphore_images["ERROR"] = pygame.image.load(f"{SEMAPHORES_PATH}ERROR.png").con
 semaphore_images["NONE"] = pygame.image.load(f"{SEMAPHORES_PATH}NONE.png").convert_alpha()
 semaphore_images["NUMERIC"] = pygame.image.load(f"{SEMAPHORES_PATH}NUMERIC.png").convert_alpha()
 semaphore_images["SPACE"] = pygame.image.load(f"{SEMAPHORES_PATH}SPACE.png").convert_alpha()
-for i in range(2, 9):
+semaphore_images["BOMB"] = pygame.image.load(f"{SEMAPHORES_PATH}BOMB.png").convert_alpha()
+for i in range(3, 9):
 	semaphore_images[f"unused_{i}"] = pygame.image.load(f"{SEMAPHORES_PATH}unused_{i}.png").convert_alpha()
 
 # --- Semaphore Positions ---

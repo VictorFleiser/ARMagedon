@@ -37,10 +37,10 @@ class SemaphorePanel:
         """Updates progress based on time and semaphore state."""
         current_time = time.time()
 
-        # Only progress if a valid letter or SPACE is detected and not completed
+        # Only progress if a valid letter or BOMB is detected and not completed
         # if not self.completed and (
         #     (self.semaphore_detected.isalpha() and len(self.semaphore_detected) == 1)
-        #     or self.semaphore_detected == "SPACE"
+        #     or self.semaphore_detected == "BOMB"
         # ):
         if not self.completed :
             elapsed = current_time - self.last_update_time
@@ -104,7 +104,7 @@ class SemaphorePanel:
         # Determine letter to display
         if self.semaphore_detected.isalpha() and len(self.semaphore_detected) == 1:
             display_symbol = self.semaphore_detected.upper()
-        elif self.semaphore_detected == "SPACE":
+        elif self.semaphore_detected == "BOMB":
             display_symbol = "☆"
         else:
             display_symbol = "-"

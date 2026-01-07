@@ -143,7 +143,7 @@ class StatusPanel:
         # Semaphore hint image at end of bombs row
         sema_x = icon_x + self.bomb_slots * (bomb_images[0].get_width() + self.spacing) + self.margin_left
         sema_y = bombs_y - 5
-        scaled_img = get_scaled(semaphore_images["SPACE"], self.line_height)
+        scaled_img = get_scaled(semaphore_images["BOMB"], self.line_height)
 
         # Draw outline
         outline_rect = pygame.Rect(

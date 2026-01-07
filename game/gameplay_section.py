@@ -122,7 +122,7 @@ class Gameplay:
 
         # check for bomb usage
         bomb_used = False
-        if semaphore_detected == "SPACE":
+        if semaphore_detected == "BOMB":
             bomb_used = self.status_panel.use_bomb(1)
 
         for missile in self.missiles:
@@ -167,8 +167,8 @@ class Gameplay:
                 )
             )
 
-        # if semaphore_detected == "SPACE":
-        #     self.log("<- semaphore [SPACE] input : using a bomb to destroy all missiles")
+        # if semaphore_detected == "BOMB":
+        #     self.log("<- semaphore [BOMB] input : using a bomb to destroy all missiles")
         #     self.log("-> consume 1 bomb")
         #     # self.log("-> all missiles on screen destroyed : increase score by +200")
         #     if self.status_panel:

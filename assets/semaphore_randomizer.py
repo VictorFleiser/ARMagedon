@@ -54,8 +54,8 @@ with open(randomized_mapping_file, 'w') as f:
 		f.write(f"{letter} {hand1} {hand2} {letter}.png\n")
 
 # Step 5 : copy the other images and mapping file
-other_images = ["CANCEL.png", "ERROR.png", "NONE.png", "NUMERIC.png", "SPACE.png"]
-other_images += [f"unused_{i}.png" for i in range(2, 9)]
+other_images = ["CANCEL.png", "ERROR.png", "NONE.png", "NUMERIC.png", "SPACE.png", "BOMB.png"]
+other_images += [f"unused_{i}.png" for i in range(3, 9)]
 for image in other_images:
 	original_image_file = os.path.join(OG_semaphore_dir, image)
 	if not os.path.exists(original_image_file):
