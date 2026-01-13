@@ -21,11 +21,16 @@ from game.UI.webcam_section import WebcamPanel, cap
 from game.gameplay_section import Gameplay
 from game.logger import GameplayLogger
 from game.logger import WebcamLogger
+from game.game_clock import GameClock
+from game.menus.pause_screen import PauseScreen
 
 # Initialize loggers
 timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 gameplay_logger = GameplayLogger(f"logs/gameplay_logs_{timestamp}.jsonl")
 webcam_logger = WebcamLogger(f"logs/webcam_logs_{timestamp}.jsonl")
+
+# Initialize game clock
+game_clock = GameClock(gameplay_logger, webcam_logger)
 
 # --- Layout computation ---
 game_col_width = SCREEN_HEIGHT  # Square gameplay area
@@ -39,11 +44,12 @@ row1_height = remaining_height // 2
 row2_height = remaining_height - row1_height
 
 # --- Instantiate panels ---
-gameplay_section = Gameplay(pygame.Rect(0, 0, game_col_width, SCREEN_HEIGHT), gameplay_logger)
+gameplay_section = Gameplay(pygame.Rect(0, 0, game_col_width, SCREEN_HEIGHT), gameplay_logger, game_clock)
 status_section = StatusPanel(pygame.Rect(game_col_width, 0, ui_col_width, row1_height), gameplay_logger)
 semaphore_section = SemaphorePanel(pygame.Rect(game_col_width, row1_height, ui_col_width, row2_height))
 bonus_section = BonusBar(pygame.Rect(game_col_width, row1_height + row2_height, ui_col_width, row3_height))
 webcam_section = WebcamPanel(pygame.Rect(game_col_width, row1_height + row2_height + row3_height, ui_col_width, row4_height), webcam_logger)
+pause_screen = PauseScreen(pygame.Rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT), game_clock)
 
 # Cross-references
 gameplay_section.status_panel = status_section
@@ -84,6 +90,14 @@ while running:
             elif event.key == pygame.K_p:
                 profile_mode = not profile_mode
                 print(f"Performance profiling: {'ON' if profile_mode else 'OFF'}")
+            elif event.key == pygame.K_ESCAPE:
+                if game_clock.button_paused:
+                    game_clock.resume("player_resumed")
+                else:
+                    game_clock.pause("player_paused")
+        
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            pause_screen.handle_event(event)
 
     # Webcam update
     t0 = time.perf_counter()
@@ -111,6 +125,8 @@ while running:
     semaphore_section.draw(screen)
     bonus_section.draw(screen)
     webcam_section.draw(screen, frame, debug_mode=debug_mode)
+    if game_clock.button_paused:
+        pause_screen.draw(screen)
 
     pygame.display.flip()
     if profile_mode:

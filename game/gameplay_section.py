@@ -14,12 +14,13 @@ from game.effects.floating_text import FloatingTextEffect
 from game.other_gameplay.buildings import BuildingGrid
 
 class Gameplay:
-    def __init__(self, rect, gameplay_logger):
+    def __init__(self, rect, gameplay_logger, game_clock):
         # --- Initialization ---
         self.background_image = pygame.image.load("assets/sprites/gameplay_bg.png").convert()
         self.grid_size = 10
         self.rect = rect
         self.gameplay_logger = gameplay_logger
+        self.game_clock = game_clock
         # # --- Debug mode (terminal display from the initial code back in september/october) ---
         # self.debug_terminal = False
         # self.font = pygame.font.SysFont("Consolas", 18)
@@ -117,6 +118,9 @@ class Gameplay:
         self.gameplay_logger.bonus_bar_filled(kind)
 
     def semaphore_input(self, semaphore_detected):
+        if self.game_clock.paused:
+            return  # ignore inputs when paused
+
         destroyed = []
 
         # logging
@@ -191,9 +195,9 @@ class Gameplay:
     #                    Update loop
     # -------------------------------------------------------
     def update(self):
-        now = pygame.time.get_ticks()
-        dt = (now - self.last_time) / 1000.0
-        self.last_time = now
+        dt = self.game_clock.get_dt()
+        if self.game_clock.paused:
+            return  # skip update when paused
 
         for missile in self.missiles:
             if missile.update(dt):

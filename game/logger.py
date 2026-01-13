@@ -25,6 +25,22 @@ class BaseLogger:
 	def close(self):
 		self.file.close()
 
+	# --- Pause / Resume logging ---
+	def pause(self, reason):
+		# when the game is paused
+		# reason = "player_paused" (when escape is pressed) or "level_transition" (for when the gameplay is paused during level transitions)
+		self.log(
+			"game_paused",
+			reason=reason
+		)
+
+	def resume(self, reason):
+		# when the game is resumed
+		# reason = "player_resumed" (when escape is pressed) or "level_transition_complete" (for when the gameplay is resumed after level transitions)
+		self.log(
+			"game_resumed",
+			reason=reason
+		)
 
 class GameplayLogger(BaseLogger):
 
