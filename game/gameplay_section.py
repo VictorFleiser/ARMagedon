@@ -50,8 +50,8 @@ class Gameplay:
             overall_knowledge_threshold=0.5,
             spawn_interval=4.0,
             speed_range=(12.5, 12.5),
-            hint_min=0.3,
-            hint_max=0.8,
+            hint_min=0.5,
+            hint_max=0.95,
             focus_weak_prob=0.8,
             ignore_correct_after_hint=True,
             bkt_params={
@@ -97,22 +97,24 @@ class Gameplay:
     #                 Event simulation functions
     # -------------------------------------------------------
     def bonus_bar_filled(self):
-        pass
-        # kind = "life" if random.random() < 0.5 else "bomb"
-        # self.log(f"<- bonus bar filled : spawning a {kind} missile")
-
-
-    def resolve_bonus_event(self):
-        pass
-    #     kind = getattr(self, "pending_kind", "life")
-    #     if kind == "life":
-    #         self.log("-> life missile destroyed : life fragment obtained")
-    #         if self.status_panel:
-    #             self.status_panel.gain_life_fragments(1)
-    #     else:
-    #         self.log("-> bomb missile destroyed : bomb fragment obtained")
-    #         if self.status_panel:
-    #             self.status_panel.gain_bomb_fragments(1)
+        # get random bonus : 50% protection, 30% bomb, 20% life
+        r = random.random()
+        if r < 0.5:
+            kind = "protection"
+            random_column = random.randint(0, self.grid_size - 1)
+            lowest_empty_cell = -1
+            for row in range(self.grid_size):
+                if self.buildings.grid[row][random_column] < 2:
+                    lowest_empty_cell = row
+                    break
+            self.buildings.grid[lowest_empty_cell][random_column] = 2  # place a protection building
+        elif r < 0.8:
+            kind = "bomb"
+            self.status_panel.gain_bomb_fragments(1)
+        else:
+            kind = "life"
+            self.status_panel.gain_life_fragments(1)
+        self.gameplay_logger.bonus_bar_filled(kind)
 
     def semaphore_input(self, semaphore_detected):
         destroyed = []
@@ -151,6 +153,7 @@ class Gameplay:
                     missile.bkt_updated_flag = True
             
             self.status_panel.gain_score(score)
+            self.bonus_bar.gain_score(score)
             missile.alive = False
             pos = (missile.x, missile.y)
 

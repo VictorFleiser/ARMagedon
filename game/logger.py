@@ -129,6 +129,14 @@ class GameplayLogger(BaseLogger):
 			all_p_k=all_p_k
 		)
 
+	# --- Bonus Bar ---
+	def bonus_bar_filled(self, bonus_kind):
+		# when the bonus bar is completely filled
+		self.log(
+			"bonus_bar_filled",
+			bonus_kind=bonus_kind
+		)
+
 
 class WebcamLogger(BaseLogger):
 

@@ -96,7 +96,6 @@ while running:
     # Update dependent panels
     t0 = time.perf_counter()
     semaphore_section.update_semaphore_detected(new_semaphore)
-    bonus_section.update_semaphore_detected(new_semaphore)
 
     semaphore_section.update()
     bonus_section.update()

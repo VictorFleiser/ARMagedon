@@ -43,7 +43,8 @@ for row in range(GRID_SIZE):
 	for col in range(GRID_SIZE):
 		status = GRID[row][col]
 		if status == 0:
-			continue  # no building, skip
+			# continue  # no building, skip
+			pass # generate the sprite anyway since we can now have additional buildings added later
 
 		# Crop the cell image
 		left = col * cell_width
@@ -70,6 +71,8 @@ for row in range(GRID_SIZE):
 				# damaged_image.save(sprite_path)
 
 		# Add to pattern file
+		if status == 0:
+			continue  # Don't add to pattern file
 		pattern_lines.append(f"{col} {game_row_index} 2")
 
 # Write pattern file
