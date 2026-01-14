@@ -1,3 +1,4 @@
+import sys
 import pygame
 import cv2
 import mediapipe as mp
@@ -9,8 +10,55 @@ from datetime import datetime
 # Screen setup
 SCREEN_WIDTH, SCREEN_HEIGHT = 1280, 720
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("Alphattack - Hand Semaphore Version")
+pygame.display.set_caption("ARMagedon")
 clock = pygame.time.Clock()
+pygame.font.init()
+
+# ========================= MAIN MENU CODE =========================
+# Code for displaying the main menu and the various sub menus, once the game starts this code exits the while loop
+from game.menus.main_menu import MainMenu
+
+main_menu_flag = True
+quit_game = False
+
+def start_game_callback():
+    global main_menu_flag
+    main_menu_flag = False
+
+main_menu = MainMenu(screen, start_game_callback=lambda: start_game_callback())
+
+while main_menu_flag and not quit_game:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            quit_game = True
+            main_menu_flag = False
+            break
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            main_menu.handle_event(event)
+
+    if quit_game:
+        break
+        
+    screen.fill((0, 0, 0))
+    main_menu.draw()
+    pygame.display.flip()
+    clock.tick(60)
+
+# Cleanup main menu webcam
+if hasattr(main_menu, 'webcam_section'):
+    main_menu.webcam_section.close()
+
+# If user quit during main menu, skip to cleanup
+if quit_game:
+    from game.UI.webcam_section import cap
+    print("Initiating shutdown...")
+    cap.release()
+    cv2.destroyAllWindows()
+    pygame.quit()
+    print("Shutdown complete.")
+    sys.exit(0)
+
+# ========================= MAIN GAME CODE =========================
 
 # --- Import assets and UI components ---
 from assets.assets import BLACK, WHITE, GREEN, BLUE, font, big_font
@@ -70,6 +118,7 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+            break
 
         elif event.type == GAMEOVER_EVENT:
             gameplay_section.gameover()
@@ -98,6 +147,10 @@ while running:
         
         elif event.type == pygame.MOUSEBUTTONDOWN:
             pause_screen.handle_event(event)
+
+    # Skip frame processing if quitting
+    if not running:
+        break
 
     # Webcam update
     t0 = time.perf_counter()
@@ -151,3 +204,4 @@ cap.release()
 cv2.destroyAllWindows()
 pygame.quit()
 print("Shutdown complete.")
+sys.exit(0)

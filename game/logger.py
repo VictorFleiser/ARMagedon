@@ -185,3 +185,45 @@ class WebcamLogger(BaseLogger):
 	#         semaphore=semaphore,
 	#         landmarks_positions=landmarks_positions
 	#     )
+
+class DummyLogger(BaseLogger):
+	# Logger that overrides all methods to do nothing (for when we re-use classes that expect a logger but don't need logging)
+	def __init__(self):
+		pass
+	def log(self, event_type=None, **data):
+		pass
+	def close(self):
+		pass
+	def pause(self, reason=None):
+		pass
+	def resume(self, reason=None):
+		pass
+	def missile_spawned(self, missile=None):
+		pass
+	def missile_hint_shown(self, missile=None):
+		pass
+	def missile_destroyed(self, missile=None, progress=None, score=None, bomb_used=None):
+		pass
+	def missile_hit_ground(self, missile=None, progress=None):
+		pass
+	def semaphore_completed(self, semaphore=None):
+		pass
+	def lives_updated(self, lives_remaining=None, life_fragments=None):
+		pass
+	def bombs_updated(self, bombs_remaining=None, bomb_fragments=None):
+		pass
+	def score_updated(self, new_score=None):
+		pass
+	def bkt_update(self, letter=None, outcome=None, p_k=None, base_decay_rate=None, stability_factor=None, verbose=True):
+		pass
+	def bkt_state_snapshot(self, all_p_k=None, verbose=False):
+		pass
+	def bonus_bar_filled(self, bonus_kind=None):
+		pass
+	def invalid_detection(self, landmarks_positions=None):
+		pass
+	def valid_detection(self, landmarks_positions=None):
+		pass
+	def semaphore_detected(self, semaphore=None, landmarks_positions=None):
+		pass
+	
