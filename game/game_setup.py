@@ -45,7 +45,7 @@ def setup_game(screen, current_profile, profile_manager):
     semaphore_section = SemaphorePanel(pygame.Rect(game_col_width, row1_height, ui_col_width, row2_height))
     bonus_section = BonusBar(pygame.Rect(game_col_width, row1_height + row2_height, ui_col_width, row3_height))
     webcam_section = WebcamPanel(pygame.Rect(game_col_width, row1_height + row2_height + row3_height, ui_col_width, row4_height), webcam_logger)
-    pause_screen = PauseScreen(pygame.Rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT), game_clock)
+    pause_screen = PauseScreen(pygame.Rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT), game_clock, audio_manager)
     level_transition_screen = LevelTransitionScreen(pygame.Rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT), game_clock)
     
     # Start background music

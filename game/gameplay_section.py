@@ -125,7 +125,7 @@ class Gameplay:
             available_letters=available_letters,
             initial_number_of_letters_tested=level_definitions[0],
             overall_knowledge_threshold=0.5,
-            spawn_interval=2.0,
+            spawn_interval=4.0,
             speed_range=(12.5, 12.5),
             hint_min=0.5,
             hint_max=0.95,

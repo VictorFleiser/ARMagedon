@@ -5,7 +5,7 @@ class LevelTransitionScreen:
     def __init__(self, screen_rect, game_clock):
         self.screen_rect = screen_rect
         self.game_clock = game_clock
-        self.huge_font = pygame.font.SysFont(None, 120)
+        self.huge_font = pygame.font.SysFont(None, 240)
         self.font = pygame.font.SysFont(None, 48)
         self.small_font = pygame.font.SysFont(None, 32)
         self.tiny_font = pygame.font.SysFont(None, 24)
@@ -100,7 +100,7 @@ class LevelTransitionScreen:
         
         if self.countdown_active: # Show countdown
             if self.countdown_value > 0:
-                countdown_text = self.huge_font.render(str(self.countdown_value), True, (200, 150, 0))
+                countdown_text = self.huge_font.render(str(self.countdown_value), True, (0, 0, 0))
                 countdown_rect = countdown_text.get_rect(center=(gameplay_center_x, self.screen_rect.centery))
                 surface.blit(countdown_text, countdown_rect)
             return
