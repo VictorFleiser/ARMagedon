@@ -3,10 +3,9 @@ import pygame
 from game.game_clock import GameClock
 
 class PauseScreen:
-    def __init__(self, screen_rect, game_clock: GameClock, audio_manager):
+    def __init__(self, screen_rect, game_clock: GameClock):
         self.screen_rect = screen_rect
         self.game_clock = game_clock
-        self.audio_manager = audio_manager
         self.font = pygame.font.SysFont(None, 72)
         self.small_font = pygame.font.SysFont(None, 36)
         self.overlay = pygame.Surface((screen_rect.width, screen_rect.height))
@@ -43,6 +42,5 @@ class PauseScreen:
         if event.type == pygame.MOUSEBUTTONDOWN:
             if self.resume_button_rect.collidepoint(event.pos):
                 self.game_clock.resume("player_resumed")
-                self.audio_manager.resume_music()
             elif self.quit_button_rect.collidepoint(event.pos):
                 pygame.event.post(pygame.event.Event(pygame.QUIT))

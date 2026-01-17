@@ -22,11 +22,11 @@ def setup_game(screen, current_profile, profile_manager):
     gameplay_logger = GameplayLogger(f"logs/gameplay_logs_{timestamp}.jsonl")
     webcam_logger = WebcamLogger(f"logs/webcam_logs_{timestamp}.jsonl")
     
-    # Initialize game clock
-    game_clock = GameClock(gameplay_logger, webcam_logger)
-    
     # Initialize audio manager
     audio_manager = AudioManager()
+
+    # Initialize game clock
+    game_clock = GameClock(gameplay_logger, webcam_logger, audio_manager)
     
     # --- Layout computation ---
     game_col_width = SCREEN_HEIGHT  # Square gameplay area
@@ -45,7 +45,7 @@ def setup_game(screen, current_profile, profile_manager):
     semaphore_section = SemaphorePanel(pygame.Rect(game_col_width, row1_height, ui_col_width, row2_height))
     bonus_section = BonusBar(pygame.Rect(game_col_width, row1_height + row2_height, ui_col_width, row3_height))
     webcam_section = WebcamPanel(pygame.Rect(game_col_width, row1_height + row2_height + row3_height, ui_col_width, row4_height), webcam_logger)
-    pause_screen = PauseScreen(pygame.Rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT), game_clock, audio_manager)
+    pause_screen = PauseScreen(pygame.Rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT), game_clock)
     level_transition_screen = LevelTransitionScreen(pygame.Rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT), game_clock)
     
     # Start background music

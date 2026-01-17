@@ -1,11 +1,12 @@
 import pygame
 
 class GameClock:
-    def __init__(self, gameplay_logger, webcam_logger):
+    def __init__(self, gameplay_logger, webcam_logger, audio_manager):
         self.gameplay_logger = gameplay_logger
         self.webcam_logger = webcam_logger
         self.last_time = pygame.time.get_ticks()
         self.paused = False
+        self.audio_manager = audio_manager
         
         # 2 types of pauses : 1 for when the player presses escape, another for level transitions
         self.button_paused = False
@@ -21,6 +22,7 @@ class GameClock:
             print(f"Unknown pause reason: {reason}")
             return
         self.paused = True
+        self.audio_manager.pause_music()
 
         # Log pause event
         self.gameplay_logger.pause(reason)
@@ -37,6 +39,7 @@ class GameClock:
         # Only unpause if both pause flags are false
         if not self.button_paused and not self.transition_paused:
             self.paused = False
+            self.audio_manager.resume_music()
 
             # Log resume event
             self.gameplay_logger.resume(reason)

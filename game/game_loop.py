@@ -49,16 +49,12 @@ def handle_events(components, debug_mode, profile_mode):
                 print(f"Performance profiling: {'ON' if profile_mode else 'OFF'}")
             elif event.key == pygame.K_ESCAPE:
                 game_clock = components['game_clock']
-                audio_manager = components['audio_manager']
                 if game_clock.button_paused:
                     game_clock.resume("player_resumed")
-                    audio_manager.resume_music()
                 elif components['level_transition_screen'].active:
                     game_clock.button_paused = True
-                    audio_manager.pause_music()
                 else:
                     game_clock.pause("player_paused")
-                    audio_manager.pause_music()
         
         elif event.type == pygame.MOUSEBUTTONDOWN:
             components['pause_screen'].handle_event(event)

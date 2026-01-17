@@ -162,6 +162,8 @@ class Gameplay:
         self.bkt_snapshot_interval = 5.0
         self.bkt_snapshot_timer = 0.0
 
+        self.missiles_destroyed_this_level = 0
+
     # # -------------------------------------------------------
     # #                     Terminal Logging helper
     # # -------------------------------------------------------
@@ -225,6 +227,7 @@ class Gameplay:
 
             # logging
             self.gameplay_logger.missile_destroyed(missile, (missile.y - missile.start_y) / missile.distance, score, bomb_used)
+            self.missiles_destroyed_this_level += 1
             
             # Update BKT model
             if isinstance(self.spawner, BKTPickSpawner):
@@ -315,7 +318,7 @@ class Gameplay:
         # Check for level advancement (if using BKT with level progression)
         if isinstance(self.spawner, BKTPickSpawner) and self.spawner.use_level_progression:
             level_advancement = self.spawner.check_level_advancement()
-            if level_advancement is not None:
+            if level_advancement is not None and self.missiles_destroyed_this_level > 10:
                 next_level, new_letters = level_advancement
                 # Trigger level transition event
                 level_transition_event = pygame.event.Event(
@@ -324,6 +327,7 @@ class Gameplay:
                     new_letters=new_letters
                 )
                 pygame.event.post(level_transition_event)
+                self.missiles_destroyed_this_level = 0
 
         self.missiles = [m for m in self.missiles if m.alive]
 
