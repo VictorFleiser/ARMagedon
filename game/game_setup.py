@@ -76,12 +76,7 @@ def setup_game(screen, current_profile, profile_manager):
 
 def load_profile_data(current_profile, gameplay_section, status_section, level_transition_screen, gameplay_logger):
     """Load profile data into game components"""
-    # Load BKT state from profile if available
-    if current_profile.get('bkt_state'):
-        print("Loading BKT state from profile...")
-        for letter, p_k in current_profile['bkt_state'].items():
-            if letter in gameplay_section.spawner.bkt.p_k:
-                gameplay_section.spawner.bkt.p_k[letter] = p_k
+    # P(K) always starts at P(L0) - no loading from profile
     
     # Load success_score from profile
     if current_profile.get('success_score'):
@@ -96,29 +91,7 @@ def load_profile_data(current_profile, gameplay_section, status_section, level_t
         print(f"Restoring to level {saved_level}...")
         gameplay_section.spawner.advance_to_level(saved_level)
     
-    # Load stats from profile (lives, bombs, score)
-    if current_profile.get('stats'):
-        stats = current_profile['stats']
-        print("Loading stats from profile...")
-        
-        # Restore score
-        if 'total_score' in stats:
-            status_section.score = stats['total_score']
-            print(f"  Score: {status_section.score}")
-        
-        # Restore lives (with fragments)
-        if 'lives_remaining' in stats:
-            lives_total = stats['lives_remaining']
-            status_section.lives = int(lives_total)
-            status_section.life_fragments = int((lives_total % 1.0) * 4)
-            print(f"  Lives: {status_section.lives} + {status_section.life_fragments}/4 fragments")
-        
-        # Restore bombs (with fragments)
-        if 'bombs_remaining' in stats:
-            bombs_total = stats['bombs_remaining']
-            status_section.bombs = int(bombs_total)
-            status_section.bomb_fragments = int((bombs_total % 1.0) * 4)
-            print(f"  Bombs: {status_section.bombs} + {status_section.bomb_fragments}/4 fragments")
+    # Stats (lives, bombs, score) are reset every session - no loading
     
     # Initialize first level transition (only for new players)
     if gameplay_section.spawner.use_level_progression and gameplay_section.spawner.level_definitions and saved_level == 0:

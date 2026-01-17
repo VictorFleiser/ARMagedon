@@ -24,14 +24,8 @@ class ProfileManager:
             "total_playtime_seconds": 0.0,
             "current_level": 0,
             "tutorial_completed": False,
-            "bkt_state": {}, # P(K) for each letter
-            "success_score": {}, # Success count for each letter (used for short-term decay)
-            "long_term_score": {}, # Long-term mastery score (increases when P(K) >= 0.5 at session end)
-            "stats": {
-                "total_score": 0,
-                "lives_remaining": 3.0,
-                "bombs_remaining": 3.0
-            },
+            "success_score": {}, # Success count for each letter (used for short-term decay and persistence)
+            "long_term_score": {}, # Long-term mastery score (increases when success_score >= 10 at session end)
             "long_term_decay_params": {
                 "initial_stability_days": 1.0,
                 "multiplier_factor": 2.5
@@ -48,7 +42,7 @@ class ProfileManager:
         
         return profile_data
     
-    def save_profile(self, bkt_state=None, success_score=None, current_level=None, stats=None, session_duration=0.0, long_term_threshold=0.5):
+    def save_profile(self, success_score=None, current_level=None, session_duration=0.0, success_score_threshold=5):
         """ Save current profile with updated data """
         if self.current_profile is None:
             raise ValueError("No profile loaded")
@@ -56,38 +50,35 @@ class ProfileManager:
         # Update
         self.current_profile['last_played'] = datetime.now().isoformat()
         self.current_profile['total_playtime_seconds'] += session_duration
-        if bkt_state is not None:
-            self.current_profile['bkt_state'] = bkt_state
+        
         if success_score is not None:
             self.current_profile['success_score'] = success_score
-        if bkt_state is not None:
+            
             if 'long_term_score' not in self.current_profile:
                 self.current_profile['long_term_score'] = {}
             
             print("\n" + "=" * 60)
             print("LONG-TERM SCORE UPDATE (Session End)")
             print("=" * 60)
-            print(f"Threshold: P(K) >= {long_term_threshold}")
+            print(f"Threshold: success_score >= {success_score_threshold}")
             print("-" * 60)
 
-            # increase by 1 for letters with P(K) >= threshold
-            for letter, p_k in bkt_state.items():
-                if p_k >= long_term_threshold:
+            # increase by 1 for letters with success_score >= threshold
+            for letter, s_score in success_score.items():
+                if s_score >= success_score_threshold:
                     old_score = self.current_profile['long_term_score'].get(letter, 0)
                     new_score = old_score + 1
                     self.current_profile['long_term_score'][letter] = new_score
-                    print(f"Letter {letter}: P(K)={p_k:.4f} >= {long_term_threshold} -> Long-term score: {old_score} -> {new_score}")
+                    print(f"Letter {letter}: success_score={s_score} >= {success_score_threshold} -> Long-term score: {old_score} -> {new_score}")
                 else:
                     current_score = self.current_profile['long_term_score'].get(letter, 0)
                     self.current_profile['long_term_score'][letter] = current_score
-                    print(f"Letter {letter}: P(K)={p_k:.4f} < {long_term_threshold} -> Long-term score unchanged: {current_score}")
+                    print(f"Letter {letter}: success_score={s_score} < {success_score_threshold} -> Long-term score unchanged: {current_score}")
             
             print("=" * 60 + "\n")
         
         if current_level is not None:
             self.current_profile['current_level'] = current_level
-        if stats is not None:
-            self.current_profile['stats'].update(stats)
         
         # Write to file
         filepath = self.current_profile.get('filepath')
@@ -189,43 +180,43 @@ class ProfileManager:
             print("=" * 60 + "\n")
             return
         
-        bkt_state = self.current_profile.get('bkt_state', {})
+        success_score = self.current_profile.get('success_score', {})
         long_term_score = self.current_profile.get('long_term_score', {})
         
-        if not bkt_state:
-            print("No BKT state found, skipping decay")
+        if not success_score:
+            print("No success_score found, skipping decay")
             print("=" * 60 + "\n")
             return
         
-        print(f"Applying decay to {len(bkt_state)} letters:")
+        print(f"Applying decay to {len(success_score)} letters:")
         print("-" * 60)
         
-        # Apply decay to each letter
-        for letter, p_k_old in bkt_state.items():
+        # Apply decay to each letter's success_score
+        for letter, s_score_old in success_score.items():
             # stability from long_term_score: S = initial_stability * multiplier^(long_term_score)
             score = long_term_score.get(letter, 0)
             S = initial_stability * (multiplier_factor ** score)
             
-            # P(K)_new = P(K)_old * e^(-deltaT/S)
+            # success_score_new = success_score_old * e^(-deltaT/S)
             decay_factor = math.exp(-days_elapsed / S)
-            p_k_new = p_k_old * decay_factor
-            p_k_new = max(0.0, p_k_new)
+            s_score_new = s_score_old * decay_factor
+            s_score_new = max(0, int(round(s_score_new)))  # Keep as int
             
-            # Update BKT state
-            bkt_state[letter] = p_k_new
+            # Update success_score
+            success_score[letter] = s_score_new
             
-            percent_retained = (p_k_new / p_k_old * 100) if p_k_old > 0 else 0
+            percent_retained = (s_score_new / s_score_old * 100) if s_score_old > 0 else 0
             
             print(f"Letter {letter}:")
             print(f"  Long-term score: {score}")
             print(f"  Stability (S): {S:.2f} days  ({initial_stability} × {multiplier_factor}^{score})")
-            print(f"  P(K) before:   {p_k_old:.4f}")
+            print(f"  Success score before:   {s_score_old}")
             print(f"  Decay factor:  {decay_factor:.4f}  (e^(-{days_elapsed:.4f}/{S:.2f}))")
-            print(f"  P(K) after:    {p_k_new:.4f}  ({percent_retained:.1f}% retained)")
+            print(f"  Success score after:    {s_score_new}  ({percent_retained:.1f}% retained)")
             print()
         
         # Update profile
-        self.current_profile['bkt_state'] = bkt_state
+        self.current_profile['success_score'] = success_score
         
         print("=" * 60)
         print("Long-term decay applied successfully\n")
