@@ -5,7 +5,7 @@ import numpy as np
 import time
 import random
 
-from assets.assets import WHITE, font
+from assets.assets import WHITE, font, SEMAPHORES_PATH
 from game.missiles.missile import Missile
 from game.missiles.spawner_random_pick import RandomPickSpawner
 from game.missiles.spawner_bkt_pick import BKTPickSpawner
@@ -14,13 +14,14 @@ from game.effects.floating_text import FloatingTextEffect
 from game.other_gameplay.buildings import BuildingGrid
 
 class Gameplay:
-    def __init__(self, rect, gameplay_logger, game_clock):
+    def __init__(self, rect, gameplay_logger, game_clock, audio_manager):
         # --- Initialization ---
         self.background_image = pygame.image.load("assets/sprites/gameplay_bg.png").convert()
         self.grid_size = 10
         self.rect = rect
         self.gameplay_logger = gameplay_logger
         self.game_clock = game_clock
+        self.audio_manager = audio_manager
         # # --- Debug mode (terminal display from the initial code back in september/october) ---
         # self.debug_terminal = False
         # self.font = pygame.font.SysFont("Consolas", 18)
@@ -43,25 +44,101 @@ class Gameplay:
         self.buildings = BuildingGrid(self.grid_size, self.rect, self.building_pattern_path)
 
         # self.spawner = RandomPickSpawner(gameplay=self, available_letters=["A", "E", "I", "O", "U"])
-        # --- Missile spawner (BKT-based) ---
+        # --- Missile spawner (BKT-based) with level progression ---
+        semaphore_pose_order = [ # independant of letters to work with randomized semaphores
+            # Level 1
+            ('Low_Right', 'Down'), # A
+            ('Right', 'Down'), # B
+            ('High_Right', 'Down'), # C
+            # Level 2
+            ('Up', 'Down'), # D
+            ('Down', 'High_Left'), # E
+            ('Down', 'Left'), # F
+            ('Down', 'Low_Left'), # G
+            # Level 3:
+            ('Right', 'Low_Right'), # H
+            ('High_Right', 'Low_Right'), # I
+            ('Up', 'Left'), # J (outlier)
+            # Level 4
+            ('Low_Right', 'Up'), # K
+            ('Low_Right', 'High_Left'), # L
+            ('Low_Right', 'Left'), # M
+            ('Low_Right', 'Low_Left'), # N
+            # Level 5
+            ('High_Right', 'Right'), # O
+            ('Right', 'Up'), # P
+            ('Right', 'High_Left'), # Q
+            ('Right', 'Left'), # R
+            ('Right', 'Low_Left'), # S
+            # Level 6
+            ('High_Right', 'Up'), # T
+            ('High_Right', 'High_Left'), # U
+            # Level 7
+            ('Up', 'Low_Left'), # V
+            ('Left', 'High_Left'), # W
+            ('Low_Left', 'High_Left'), # X
+            # Level 8: Remaining complex
+            ('High_Right', 'Left'), # Y
+            ('Low_Left', 'Left'), # Z
+        ]
+        
+        # Map letters to their semaphore poses
+        letter_to_pose = {}
+        with open(f"{SEMAPHORES_PATH}semaphores_mapping.txt", 'r') as f:
+            lines = f.readlines()
+            for line in lines:
+                parts = line.strip().split()
+                if len(parts) == 4:
+                    letter, left, right, _ = parts
+                    letter_to_pose[letter] = (left, right)
+        
+        # Build level_definitions by mapping poses to letters
+        level_sizes = [3, 4, 3, 4, 5, 2, 3, 2]
+        level_definitions = []
+        pose_index = 0
+        
+        for level_size in level_sizes:
+            level_letters = []
+            for _ in range(level_size):
+                if pose_index < len(semaphore_pose_order):
+                    target_pose = semaphore_pose_order[pose_index]
+                    # Find letter with this pose
+                    found = False
+                    for letter, pose in letter_to_pose.items():
+                        if pose == target_pose:
+                            level_letters.append(letter)
+                            found = True
+                            break
+                    if not found:
+                        print(f"WARNING: No letter found for pose {target_pose}")
+                    pose_index += 1
+            if level_letters:
+                level_definitions.append(level_letters)
+        
+        # Build available_letters from level_definitions (in order)
+        available_letters = []
+        for level in level_definitions:
+            available_letters.extend(level)
+        
         self.spawner = BKTPickSpawner(
             gameplay=self,
-            available_letters=list("EAISNRTOLUDCMPGBVHFQYXJKWZ"),
-            initial_number_of_letters_tested=1,
+            available_letters=available_letters,
+            initial_number_of_letters_tested=level_definitions[0],
             overall_knowledge_threshold=0.5,
-            spawn_interval=4.0,
+            spawn_interval=2.0,
             speed_range=(12.5, 12.5),
             hint_min=0.5,
             hint_max=0.95,
-            focus_weak_prob=0.8,
             ignore_correct_after_hint=True,
+            use_level_progression=True,
+            level_definitions=level_definitions,
             bkt_params={
-                'p_l0': 0.0, # Initial probability of knowing
-                'p_t': 0.1, # Transition/learning probability
+                'p_l0': 0.3, # Initial probability of knowing
+                'p_t': 0.2, # Transition/learning probability
                 'p_s': 0.1, # Slip probability
                 'p_g': 0.25, # Guess probability
-                'base_decay_rate': 0.05, # knowledge decay rate
-                'stability_factor': 0.8 # stability factor for decay adjustment
+                'base_decay_rate': 0.045, # knowledge decay rate
+                'stability_factor': 0.9 # stability factor for decay adjustment
             }
         )
 
@@ -109,12 +186,15 @@ class Gameplay:
                     lowest_empty_cell = row
                     break
             self.buildings.grid[lowest_empty_cell][random_column] = 2  # place a protection building
+            self.audio_manager.play_sound("powerup_protection", volume=0.5)
         elif r < 0.8:
             kind = "bomb"
             self.status_panel.gain_bomb_fragments(1)
+            self.audio_manager.play_sound("powerup_bomb", volume=0.8)
         else:
             kind = "life"
             self.status_panel.gain_life_fragments(1)
+            self.audio_manager.play_sound("powerup_life", volume=0.7)
         self.gameplay_logger.bonus_bar_filled(kind)
 
     def semaphore_input(self, semaphore_detected):
@@ -161,6 +241,8 @@ class Gameplay:
             missile.alive = False
             pos = (missile.x, missile.y)
 
+            self.audio_manager.play_sound("explosion", volume=0.8)
+
             self.effects.append(
                 ExplosionEffect(pos, self.explosion_sprite)
             )
@@ -194,14 +276,16 @@ class Gameplay:
     # -------------------------------------------------------
     #                    Update loop
     # -------------------------------------------------------
-    def update(self):
-        dt = self.game_clock.get_dt()
+    def update(self, dt=None):
+        if dt is None:
+            dt = self.game_clock.get_dt()
         if self.game_clock.paused:
             return  # skip update when paused
 
         for missile in self.missiles:
             if missile.update(dt):
                 # missile hit the ground
+                self.audio_manager.play_sound("missile_hit", volume=0.8)
                 if isinstance(self.spawner, BKTPickSpawner):
                     if not missile.bkt_updated_flag:
                         self.spawner.on_missile_hit_ground(missile.letter)
@@ -214,6 +298,7 @@ class Gameplay:
 
                 if status == 2:
                     # missile reached a building
+                    self.audio_manager.play_sound("missile_hit", volume=0.8)
                     self.buildings.grid[row][col] = 1   # change sprite to damaged
                     self.buildings.grid[row+1][col] = 0 # remove damaged sprite above
                     missile.alive = False
@@ -226,6 +311,19 @@ class Gameplay:
                     self.gameplay_logger.missile_hit_ground(missile, (missile.y - missile.start_y) / missile.distance)
 
         self.spawner.update(dt)
+        
+        # Check for level advancement (if using BKT with level progression)
+        if isinstance(self.spawner, BKTPickSpawner) and self.spawner.use_level_progression:
+            level_advancement = self.spawner.check_level_advancement()
+            if level_advancement is not None:
+                next_level, new_letters = level_advancement
+                # Trigger level transition event
+                level_transition_event = pygame.event.Event(
+                    pygame.USEREVENT + 20, # Custom event for level transition
+                    level=next_level,
+                    new_letters=new_letters
+                )
+                pygame.event.post(level_transition_event)
 
         self.missiles = [m for m in self.missiles if m.alive]
 
@@ -372,13 +470,21 @@ class Gameplay:
                 s_s = self.spawner.bkt.success_score.get(letter, 0)
                 prob = next_probs.get(letter, 0.0)
                 
-                # Grey out letters not yet tested
+                if p_k > 0.6:
+                    color = (100, 255, 100) # Green
+                elif p_k >= 0.5:
+                    color = (200, 255, 100) # Light Green
+                elif p_k >= 0.4:
+                    color = (255, 200, 100) # Yellow
+                elif p_k >= 0.3:
+                    color = (255, 165, 100) # Orange
+                else:
+                    color = (255, 50, 50) # Red
+                
                 if i >= tested_count:
                     color = (100, 100, 100)
-                else:
-                    color = (255, 255, 255)
                 
-                text = f"{letter}: {p_k:.3f} (S: {s_s}) [P: {prob:.2f}]"
+                text = f"{letter}: {p_k:.3f} (S:{s_s}) P:{prob:.2f}"
                 text_surface = debug_font_small.render(text, True, color)
                 text_bg = pygame.Rect(x_offset - 2, y_offset - 2, text_surface.get_width() + 4, text_surface.get_height() + 4)
                 self.draw_transparent_rect(surface, (0, 0, 0, 100), text_bg)

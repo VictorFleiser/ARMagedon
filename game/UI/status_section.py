@@ -29,6 +29,9 @@ class StatusPanel:
         self.bombs = 3
         self.bomb_fragments = 0
         self.bomb_slots = 8
+        
+        # Timer
+        self.elapsed_time = 0.0  # in seconds, excluding paused time
 
         # --- scale images to fit line height ---
         self.line_height = 45
@@ -41,7 +44,6 @@ class StatusPanel:
             bomb_images[i] = get_scaled(bomb_images[i], self.line_height)
 
     def take_damage(self):
-        """Removes one full life if available."""
         self.lives -= 1
         # logging
         self.gameplay_logger.lives_updated(self.lives, self.life_fragments)
@@ -92,6 +94,10 @@ class StatusPanel:
         self.score += number
         # logging
         self.gameplay_logger.score_updated(self.score)
+    
+    def update(self, dt):
+        """Update the elapsed time"""
+        self.elapsed_time += dt
 
     def draw(self, surface):
         pygame.draw.rect(surface, GRAY, self.rect)
@@ -156,3 +162,10 @@ class StatusPanel:
 
         # Draw the semaphore image
         surface.blit(scaled_img, (sema_x, sema_y))
+        
+        # Timer (top right)
+        minutes = int(self.elapsed_time // 60)
+        seconds = int(self.elapsed_time % 60)
+        timer_text = font.render(f"{minutes:02d}:{seconds:02d}", True, WHITE)
+        timer_rect = timer_text.get_rect(topright=(self.rect.right - self.margin_left, y + self.spacing))
+        surface.blit(timer_text, timer_rect)
