@@ -207,7 +207,8 @@ class BKTPickSpawner(MissileSpawner):
     
     def check_level_advancement(self):
         """Check if player should advance to the next level.
-        Returns the next level number and new letters if ready, otherwise None."""
+        Returns the next level number and new letters if ready, otherwise None.
+		The gameplay section may have other criteria to validate level advancement."""
         if not self.use_level_progression:
             return None
         
@@ -230,7 +231,6 @@ class BKTPickSpawner(MissileSpawner):
         if min_knowledge >= self.overall_knowledge_threshold:
             next_level = self.current_level + 1
             new_letters = self.level_definitions[next_level]
-            print(f"[Spawner] Level advancement: min_knowledge={min_knowledge:.4f} >= {self.overall_knowledge_threshold}, advancing to level {next_level}")
             return (next_level, new_letters)
         
         return None

@@ -163,6 +163,7 @@ class Gameplay:
         self.bkt_snapshot_timer = 0.0
 
         self.missiles_destroyed_this_level = 0
+        self.nb_missiles_to_destroy = 10
 
     # # -------------------------------------------------------
     # #                     Terminal Logging helper
@@ -318,7 +319,7 @@ class Gameplay:
         # Check for level advancement (if using BKT with level progression)
         if isinstance(self.spawner, BKTPickSpawner) and self.spawner.use_level_progression:
             level_advancement = self.spawner.check_level_advancement()
-            if level_advancement is not None and self.missiles_destroyed_this_level > 10:
+            if level_advancement is not None and self.missiles_destroyed_this_level >= self.nb_missiles_to_destroy:
                 next_level, new_letters = level_advancement
                 # Trigger level transition event
                 level_transition_event = pygame.event.Event(
@@ -460,6 +461,14 @@ class Gameplay:
             
             # Predict next selection probabilities
             next_probs = self.spawner.get_selection_probabilities()
+            
+            # Minimum missiles to destroy
+            progress_text = f"Missiles destroyed: {self.missiles_destroyed_this_level}/{self.nb_missiles_to_destroy}"
+            progress_surface = debug_font_small.render(progress_text, True, (200, 200, 255))
+            progress_bg = pygame.Rect(x_offset - 2, y_offset - 2, progress_surface.get_width() + 4, progress_surface.get_height() + 4)
+            self.draw_transparent_rect(surface, (0, 0, 0, 120), progress_bg)
+            surface.blit(progress_surface, (x_offset, y_offset))
+            y_offset += 18
             
             # Title
             title_surface = debug_font_small.render("Semaphore Knowledge:", True, (255, 255, 255))
