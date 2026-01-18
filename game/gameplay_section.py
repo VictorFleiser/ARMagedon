@@ -345,7 +345,8 @@ class Gameplay:
             if self.bkt_snapshot_timer >= self.bkt_snapshot_interval:
                 self.bkt_snapshot_timer = 0.0
                 bkt_state = self.spawner.get_bkt_state()
-                self.gameplay_logger.bkt_state_snapshot(bkt_state, verbose=True)
+                success_scores = self.spawner.bkt.success_score
+                self.gameplay_logger.bkt_state_snapshot(bkt_state, success_scores=success_scores, verbose=True)
 
     # -------------------------------------------------------
     #                        Draw

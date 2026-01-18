@@ -19,7 +19,8 @@ def setup_game(screen, current_profile, profile_manager):
     
     # Initialize loggers
     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    gameplay_logger = GameplayLogger(f"logs/gameplay_logs_{timestamp}.jsonl")
+    profile_number = current_profile.get('profile_number', 0)
+    gameplay_logger = GameplayLogger(f"logs/gameplay_logs_p{profile_number}_{timestamp}.jsonl")
     webcam_logger = WebcamLogger(f"logs/webcam_logs_{timestamp}.jsonl")
     
     # Initialize audio manager

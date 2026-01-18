@@ -114,7 +114,7 @@ class GameplayLogger(BaseLogger):
         )
 
     # -- BKT --
-    def bkt_update(self, letter, outcome, p_k, base_decay_rate=None, stability_factor=None, verbose=True):
+    def bkt_update(self, letter, outcome, p_k, success_score=None, base_decay_rate=None, stability_factor=None, verbose=True):
         # outcome: 'correct', 'incorrect', or 'bomb_ignore'
         if verbose: print(f"[BKT] Letter '{letter}' - Outcome: {outcome:12s} - P(K): {p_k:.4f}")
         log_data = {
@@ -122,13 +122,15 @@ class GameplayLogger(BaseLogger):
             "outcome": outcome,
             "p_k": p_k
         }
+        if success_score is not None:
+            log_data["success_score"] = success_score
         if base_decay_rate is not None:
             log_data["base_decay_rate"] = base_decay_rate
         if stability_factor is not None:
             log_data["stability_factor"] = stability_factor
         self.log("bkt_update", **log_data)
     
-    def bkt_state_snapshot(self, all_p_k, verbose=False):
+    def bkt_state_snapshot(self, all_p_k, success_scores=None, verbose=False):
         # visual and useful for debugging, i'll leave it here
         if verbose:
             print("\n" + "="*60)
@@ -140,10 +142,11 @@ class GameplayLogger(BaseLogger):
             bar = '█' * bar_length + '░' * (40 - bar_length)
             if verbose: print(f"  {letter}: {p_k:.4f} [{bar}]")
         if verbose: print("="*60 + "\n")
-        self.log(
-            "bkt_state_snapshot",
-            all_p_k=all_p_k
-        )
+        
+        if success_scores is not None:
+            self.log("bkt_state_snapshot", all_p_k=all_p_k, success_scores=success_scores)
+        else:
+            self.log("bkt_state_snapshot", all_p_k=all_p_k)
 
     # --- Bonus Bar ---
     def bonus_bar_filled(self, bonus_kind):
@@ -230,9 +233,9 @@ class DummyLogger(BaseLogger):
         pass
     def score_updated(self, new_score=None):
         pass
-    def bkt_update(self, letter=None, outcome=None, p_k=None, base_decay_rate=None, stability_factor=None, verbose=True):
+    def bkt_update(self, letter=None, outcome=None, p_k=None, success_score=None, base_decay_rate=None, stability_factor=None, verbose=True):
         pass
-    def bkt_state_snapshot(self, all_p_k=None, verbose=False):
+    def bkt_state_snapshot(self, all_p_k=None, success_scores=None, verbose=False):
         pass
     def bonus_bar_filled(self, bonus_kind=None):
         pass

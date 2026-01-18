@@ -164,6 +164,7 @@ class BKTPickSpawner(MissileSpawner):
                 letter=letter,
                 outcome='correct',
                 p_k=self.bkt.get_knowledge(letter),
+                success_score=self.bkt.success_score.get(letter, 0),
                 base_decay_rate=self.bkt.base_decay_rate,
                 stability_factor=self.bkt.stability_factor
             )
@@ -174,6 +175,7 @@ class BKTPickSpawner(MissileSpawner):
                 letter=letter,
                 outcome='bomb_ignore',
                 p_k=self.bkt.get_knowledge(letter),
+                success_score=self.bkt.success_score.get(letter, 0),
                 base_decay_rate=self.bkt.base_decay_rate,
                 stability_factor=self.bkt.stability_factor
             )
@@ -185,6 +187,7 @@ class BKTPickSpawner(MissileSpawner):
                 letter=letter,
                 outcome='incorrect',
                 p_k=self.bkt.get_knowledge(letter),
+                success_score=self.bkt.success_score.get(letter, 0),
                 base_decay_rate=self.bkt.base_decay_rate,
                 stability_factor=self.bkt.stability_factor
             )
@@ -197,6 +200,7 @@ class BKTPickSpawner(MissileSpawner):
                 letter=letter,
                 outcome='hint_shown',
                 p_k=self.bkt.get_knowledge(letter),
+                success_score=self.bkt.success_score.get(letter, 0),
                 base_decay_rate=self.bkt.base_decay_rate,
                 stability_factor=self.bkt.stability_factor
             )
