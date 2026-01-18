@@ -133,7 +133,7 @@ class Gameplay:
             use_level_progression=True,
             level_definitions=level_definitions,
             bkt_params={
-                'p_l0': 0.3, # Initial probability of knowing
+                'p_l0': 0.0, # Initial probability of knowing
                 'p_t': 0.2, # Transition/learning probability
                 'p_s': 0.1, # Slip probability
                 'p_g': 0.25, # Guess probability
