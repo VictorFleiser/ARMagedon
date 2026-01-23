@@ -15,7 +15,7 @@ class BonusBar:
 
 # --- Configuration ---
         # --- State ---
-        self.score_for_full = 3000  # score needed to fill the bar
+        self.score_for_full = 4000  # score needed to fill the bar
         self.current_score = 0 # Current score in the bar
         self.progress = self.current_score / self.score_for_full    # progress of the bar
         self.displayed_progress = self.progress  # actual progress displayed on the bar (for smooth animation)

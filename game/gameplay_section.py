@@ -178,9 +178,13 @@ class Gameplay:
     #                 Event simulation functions
     # -------------------------------------------------------
     def bonus_bar_filled(self):
-        # get random bonus : 50% protection, 30% bomb, 20% life
+        # get random bonus : 50% protection, 40% bomb, 10% life
+        # If only 1 life left : get random bonus : 25% protection, 25% bomb, 50% life
         r = random.random()
-        if r < 0.5:
+        odds_life = 0.5 if self.status_panel.lives <= 1 else 0.1
+        odds_bomb = 0.4 if self.status_panel.lives <= 1 else 0.25
+        odds_protection = 0.1 if self.status_panel.lives <= 1 else 0.5
+        if r < odds_protection:
             kind = "protection"
             random_column = random.randint(0, self.grid_size - 1)
             lowest_empty_cell = -1
@@ -190,7 +194,7 @@ class Gameplay:
                     break
             self.buildings.grid[lowest_empty_cell][random_column] = 2  # place a protection building
             self.audio_manager.play_sound("powerup_protection", volume=0.5)
-        elif r < 0.8:
+        elif r < odds_protection + odds_bomb:
             kind = "bomb"
             self.status_panel.gain_bomb_fragments(1)
             self.audio_manager.play_sound("powerup_bomb", volume=0.8)

@@ -22,7 +22,7 @@ class StatusPanel:
 
         self.score = 0
 
-        self.lives = 3
+        self.lives = 2
         self.life_fragments = 0
         self.life_slots = 8
 
