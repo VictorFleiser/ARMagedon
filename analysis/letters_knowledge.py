@@ -6,13 +6,20 @@ import plotly.graph_objects as go
 # ============================
 # Configuration
 # ============================
+LOG_FILE = "logs/gameplay_logs_Thomas33min.jsonl"
 LOG_FILE = "logs/gameplay_logs_Victor30min.jsonl"
+LOG_FILE = "logs/gameplay_logs_Victor25min.jsonl"
+LOG_FILE = "logs/gameplay_logs_Vic_random_30min.jsonl"
+
+
+
+
 
 DISPLAY_PAUSED = False        # True = flat during pause, False = cut pause out		# DO NOT SET TO TRUE, IT DOENS'T SEEM TO WORK
 DT_SAMPLING = 0.1
 
-BASE_DECAY_RATE_DEFAULT = 0.03
-STABILITY_FACTOR_DEFAULT = 0.5
+BASE_DECAY_RATE_DEFAULT = 0.035
+STABILITY_FACTOR_DEFAULT = 0.9
 
 EVENTS_TO_MARK = {
     "missile_hit_ground": "red",
