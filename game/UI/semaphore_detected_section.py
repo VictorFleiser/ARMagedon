@@ -11,7 +11,7 @@ from assets.assets import WHITE, GREEN, GRAY, PURPLE, big_font, semaphore_images
 SEMAPHORE_COMPLETE_EVENT = pygame.USEREVENT + 1
 
 class SemaphorePanel:
-    def __init__(self, rect):
+    def __init__(self, rect, hard_mode=False):
         self.rect = rect
 
         self.semaphore_detected = "NONE"
@@ -21,8 +21,8 @@ class SemaphorePanel:
         self.last_update_time = time.time()
         self.completed = False
 
-        # Timing (0.5 seconds to full progress)
-        self.progress_duration = 0.5
+        # Timing (0.5 seconds to full progress, 0.2 in hard mode)
+        self.progress_duration = 0.2 if hard_mode else 0.5
 
     def update_semaphore_detected(self, new_semaphore_detected):
         """Called by main when a new semaphore letter is detected."""
