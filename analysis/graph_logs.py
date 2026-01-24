@@ -14,6 +14,7 @@ LOG_FILE = "logs/gameplay_logs_Thomas33min.jsonl"
 LOG_FILE = "logs/gameplay_logs_Victor30min.jsonl"
 LOG_FILE = "logs/gameplay_logs_Victor25min.jsonl"
 LOG_FILE = "logs/gameplay_logs_Vic_random_30min.jsonl"
+LOG_FILE = "logs/experimentation/gameplay_logs_Max.jsonl"
 
 # FLAGS for computations : each flag slows down the creation of the plot quite a bit, turn off if not needed
 COMPUTE_MIN_KNOWLEDGE = True
@@ -199,7 +200,7 @@ fig = make_subplots(specs=[[{"secondary_y": True}]])
 
 fig.update_layout(
     legend=dict(
-        groupclick="toggleitem"
+        groupclick="togglegroup"
     )
 )
 
@@ -235,7 +236,7 @@ for letter in sorted(times.keys()):
             y=values[letter],
             mode="lines",
             name=f"Letter {letter}",
-            legendgroup="knowledge"
+            # legendgroup="knowledge"
         )
     )
     TRACE_GROUPS["knowledge"].append(len(fig.data) - 1)
@@ -304,7 +305,7 @@ if COMPUTE_MIN_KNOWLEDGE :
             mode="lines",
             name="Minimum knowledge (all letters)",
             line=dict(width=4, color="black"),
-            legendgroup="knowledge_summary"
+            # legendgroup="knowledge_summary"
         )
     )
     TRACE_GROUPS["knowledge_summary"].append(len(fig.data) - 1)
@@ -339,7 +340,7 @@ if COMPUTE_AVERAGE_KNOWLEDGE or COMPUTE_MEDIAN_KNOWLEDGE :
                 mode="lines",
                 name="Average knowledge (all letters)",
                 line=dict(width=3, color="blue"),
-                legendgroup="knowledge_summary"
+                # legendgroup="knowledge_summary"
             )
         )
         TRACE_GROUPS["knowledge_summary"].append(len(fig.data) - 1)
@@ -353,7 +354,7 @@ if COMPUTE_AVERAGE_KNOWLEDGE or COMPUTE_MEDIAN_KNOWLEDGE :
                 mode="lines",
                 name="Median knowledge (all letters)",
                 line=dict(width=3, color="green"),
-                legendgroup="knowledge_summary"
+                # legendgroup="knowledge_summary"
             )
         )
         TRACE_GROUPS["knowledge_summary"].append(len(fig.data) - 1)
@@ -410,7 +411,7 @@ fig.add_trace(
         mode="markers",
         name="Destroyed (no bomb)",
         marker=dict(color="green", size=8),
-        legendgroup="missiles",
+        # legendgroup="missiles",
     ),
     secondary_y=True,
 )
@@ -423,7 +424,7 @@ fig.add_trace(
         mode="markers",
         name="Destroyed (bomb)",
         marker=dict(color="blue", size=8),
-        legendgroup="missiles",
+        # legendgroup="missiles",
     ),
     secondary_y=True,
 )
@@ -439,7 +440,7 @@ fig.add_trace(
             color="red",
             size=missiles["hit_ground"]["size"],
         ),
-        legendgroup="missiles",
+        # legendgroup="missiles",
     ),
     secondary_y=True,
 )
@@ -459,7 +460,7 @@ def add_lowess(x, y, name, color):
             mode="lines",
             name=name,
             line=dict(color=color, width=3),
-            legendgroup="missiles",
+            # legendgroup="missiles",
         ),
         secondary_y=True,
     )
@@ -472,30 +473,24 @@ add_lowess(
     "darkgreen",
 )
 
-add_lowess(
-    missiles["destroyed_bomb"]["x"],
-    missiles["destroyed_bomb"]["y"],
-    "Trend: destroyed (bomb)",
-    "darkblue",
-)
+# add_lowess(
+#     missiles["destroyed_bomb"]["x"],
+#     missiles["destroyed_bomb"]["y"],
+#     "Trend: destroyed (bomb)",
+#     "darkblue",
+# )
 
-add_lowess(
-    missiles["hit_ground"]["x"],
-    missiles["hit_ground"]["y"],
-    "Trend: hit ground",
-    "darkred",
-)
+# add_lowess(
+#     missiles["hit_ground"]["x"],
+#     missiles["hit_ground"]["y"],
+#     "Trend: hit ground",
+#     "darkred",
+# )
 
 
 # ============================
 # Buttons to toggle visibility
 # ============================
-
-def mask_for(group):
-    return [
-        (trace.legendgroup == group)
-        for trace in fig.data
-    ]
 
 fig.update_layout(
     updatemenus=[
