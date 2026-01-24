@@ -16,8 +16,8 @@ class TutorialScreen:
         self.current_frame = None
         
         self.title_font = pygame.font.SysFont(None, 72)
-        self.text_font = pygame.font.SysFont(None, 40)
-        self.small_font = pygame.font.SysFont(None, 32)
+        self.text_font = pygame.font.SysFont(None, 60) # normal text
+        self.small_font = pygame.font.SysFont(None, 50)
         
         self.semaphore_a = pygame.image.load(f"{SEMAPHORES_PATH}A.png").convert_alpha()
         self.semaphore_b = pygame.image.load(f"{SEMAPHORES_PATH}B.png").convert_alpha()
@@ -65,9 +65,9 @@ class TutorialScreen:
         surface = pygame.Surface((width, height), pygame.SRCALPHA)
         surface.fill((20, 20, 40))
         
-        font = pygame.font.SysFont(None, 30)
+        font = pygame.font.SysFont(None, 40)
         title_font = pygame.font.SysFont(None, 48)
-        label_font = pygame.font.SysFont(None, 36)
+        label_font = pygame.font.SysFont(None, 48)
         
         # Title
         title = title_font.render("Game Mechanics", True, (255, 255, 100))
@@ -93,8 +93,8 @@ class TutorialScreen:
             (int(self.missile_img.get_width() * missile_scale),
              int(self.missile_img.get_height() * missile_scale))
         )
-        self.demo_missile_x = width - scaled_missile.get_width() - 100
-        self.demo_missile_y = 90
+        self.demo_missile_x = width - scaled_missile.get_width() - 30
+        self.demo_missile_y = 140
         self.scaled_missile = scaled_missile
         
         # Bonuses section
@@ -113,7 +113,7 @@ class TutorialScreen:
         label = label_font.render("Life:", True, (255, 255, 100))
         surface.blit(label, (130, y))
         text = font.render("Gain extra lives", True, (200, 200, 200))
-        surface.blit(text, (210, y + 5))
+        surface.blit(text, (250, y + 5))
         y += 70
         
         # Bomb bonus
@@ -122,7 +122,7 @@ class TutorialScreen:
         label = label_font.render("Bomb:", True, (255, 255, 100))
         surface.blit(label, (130, y))
         text = font.render("Destroy all missiles", True, (200, 200, 200))
-        surface.blit(text, (230, y + 5))
+        surface.blit(text, (280, y + 5))
         y += 70
         
         # Protection bonus
@@ -131,7 +131,7 @@ class TutorialScreen:
         label = label_font.render("Shield:", True, (255, 255, 100))
         surface.blit(label, (130, y))
         text = font.render("Protect buildings", True, (200, 200, 200))
-        surface.blit(text, (230, y + 5))
+        surface.blit(text, (280, y + 5))
         
         return surface
     
@@ -223,10 +223,12 @@ class TutorialScreen:
         
         # Instructions (left)
         instructions = [
-            "Step back from the camera to fit in the frame.",
+            "Step back from the camera to",
+            "fit in the frame.",
             "",
-            "Use your arms to create semaphore signals",
-            "to destroy incoming missiles!",
+            "Use your arms to create",
+            "semaphore signals to",
+            "destroy incoming missiles!",
             "",
             "Let's start with the letter A:",
         ]
@@ -261,7 +263,7 @@ class TutorialScreen:
         if not self.a_completed:
             progress = min(1.0, self.hold_time / self.required_hold_time)
             bar_width = self.webcam_rect.width - 20
-            bar_height = 30
+            bar_height = 36
             bar_x = self.webcam_rect.x + 10
             bar_y = self.webcam_rect.bottom + 20
             
@@ -356,7 +358,7 @@ class TutorialScreen:
             if not self.completed:
                 progress = min(1.0, self.hold_time / self.required_hold_time)
                 bar_width = self.webcam_rect.width - 20
-                bar_height = 30
+                bar_height = 36
                 bar_x = self.webcam_rect.x + 10
                 bar_y = self.webcam_rect.bottom + 20
                 
@@ -375,22 +377,28 @@ class TutorialScreen:
                 status_y = b_y + scaled_b.get_height() + 50
                 surface.blit(status, (status_x, status_y))
             else:
-                status = self.small_font.render("Hold semaphore B to start the game", True, (255, 200, 100))
-                status_x = b_x + scaled_b.get_width()//2 - status.get_width()//2
                 status_y = b_y + scaled_b.get_height() + 50
-                surface.blit(status, (status_x, status_y))
+                lines = ["Hold semaphore B to", "start the game"]
+                y_offset = status_y
+                for line in lines:
+                    text = self.small_font.render(line, True, (255, 200, 100))
+                    surface.blit(text, (b_x + scaled_b.get_width()//2 - text.get_width()//2, y_offset))
+                    y_offset += 30
         else:
-            status = self.small_font.render("First, destroy the demo missile with C", True, (255, 200, 100))
-            status_x = self.webcam_rect.centerx - status.get_width()//2
             status_y = self.webcam_rect.bottom + 80
-            surface.blit(status, (status_x, status_y))
+            lines = ["First, destroy the demo missile", "with C"]
+            y_offset = status_y
+            for line in lines:
+                text = self.small_font.render(line, True, (255, 200, 100))
+                surface.blit(text, (self.webcam_rect.centerx - text.get_width()//2, y_offset))
+                y_offset += 30
             
             # Progress bar for C
             progress = min(1.0, self.c_hold_time / self.required_hold_time)
             bar_width = self.webcam_rect.width - 20
-            bar_height = 30
+            bar_height = 36
             bar_x = self.webcam_rect.x + 10
-            bar_y = status_y + 50
+            bar_y = status_y + 100
             
             # Background
             pygame.draw.rect(surface, (50, 50, 50), (bar_x, bar_y, bar_width, bar_height))

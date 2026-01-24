@@ -6,9 +6,9 @@ class LevelTransitionScreen:
         self.screen_rect = screen_rect
         self.game_clock = game_clock
         self.huge_font = pygame.font.SysFont(None, 240)
-        self.font = pygame.font.SysFont(None, 48)
-        self.small_font = pygame.font.SysFont(None, 32)
-        self.tiny_font = pygame.font.SysFont(None, 24)
+        self.font = pygame.font.SysFont(None, 64)
+        self.small_font = pygame.font.SysFont(None, 56)
+        self.tiny_font = pygame.font.SysFont(None, 40)
         
         self.gameplay_width = screen_rect.height
         
@@ -114,9 +114,13 @@ class LevelTransitionScreen:
         self.draw_all_letters_by_level(surface, gameplay_center_x)
         
         # Instruction
-        instruction_text = self.small_font.render("Complete all new semaphores to continue:", True, (60, 60, 60))
-        instruction_rect = instruction_text.get_rect(center=(gameplay_center_x, 230))
-        surface.blit(instruction_text, instruction_rect)
+        lines = ["Complete all new semaphores", "to continue:"]
+        y_offset = 230 - 15  # start a bit higher to center the block
+        for line in lines:
+            instruction_text = self.small_font.render(line, True, (60, 60, 60))
+            instruction_rect = instruction_text.get_rect(center=(gameplay_center_x, y_offset))
+            surface.blit(instruction_text, instruction_rect)
+            y_offset += 30
         # New semaphores
         new_semaphore_y = 270
         new_semaphore_size = 150
