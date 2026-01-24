@@ -183,6 +183,13 @@ class WebcamPanel:
         self.debug_left_hand_coords = None
         self.debug_body_center = None
 
+        # Blur mode: 0=no blur, 1=blur face, 2=blur everywhere, 3=both
+        self.blur_mode = 0
+
+    def toggle_blur(self):
+        self.blur_mode = (self.blur_mode + 1) % 4
+        print(f"Blur mode: {self.blur_mode}")
+
     def update(self):
         ret, frame = cap.read()
         if not ret:
@@ -303,6 +310,46 @@ class WebcamPanel:
                 'left_hand': left_hand_coords,
                 'body_center': body_center
             })
+
+        # Apply blur based on mode
+        blur_amount = 31 # use an odd number !!
+        if self.blur_mode > 0:
+            face_rect = None
+            if results.face_landmarks:
+                xs = [lm.x * image_width for lm in results.face_landmarks.landmark]
+                ys = [lm.y * image_height for lm in results.face_landmarks.landmark]
+                if xs and ys:
+                    min_x = max(0, int(min(xs)))
+                    max_x = min(image_width - 1, int(max(xs)))
+                    min_y = max(0, int(min(ys)))
+                    max_y = min(image_height - 1, int(max(ys)))
+                    w = max_x - min_x
+                    h = max_y - min_y
+                    if w > 0 and h > 0:
+                        face_rect = (min_x, min_y, w, h)
+
+            if self.blur_mode == 1:
+                # Blur around face
+                if face_rect:
+                    x, y, w, h = face_rect
+                    face_roi = frame[y:y+h, x:x+w]
+                    if not face_roi.size == 0:
+                        blurred_face = cv2.GaussianBlur(face_roi, (blur_amount, blur_amount), 0)
+                        frame[y:y+h, x:x+w] = blurred_face
+            elif self.blur_mode == 2:
+                # Blur everywhere
+                frame = cv2.GaussianBlur(frame, (blur_amount, blur_amount), 0)
+            elif self.blur_mode == 3:
+                # Both: blur everywhere + extra blur on face
+                frame = cv2.GaussianBlur(frame, (blur_amount, blur_amount), 0)
+                if face_rect:
+                    x, y, w, h = face_rect
+                    face_roi = frame[y:y+h, x:x+w]
+                    if not face_roi.size == 0:
+                        extra_blur = blur_amount * 2 + 1
+                        blurred_face = cv2.GaussianBlur(face_roi, (extra_blur, extra_blur), 0)
+                        frame[y:y+h, x:x+w] = blurred_face
+
         return frame, detected_semaphore
 
     def draw(self, surface, frame, debug_mode=False):

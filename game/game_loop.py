@@ -47,12 +47,14 @@ def handle_events(components, debug_mode, profile_mode):
             elif event.key == pygame.K_p:
                 profile_mode = not profile_mode
                 print(f"Performance profiling: {'ON' if profile_mode else 'OFF'}")
+            elif event.key == pygame.K_b:
+                components['webcam_section'].toggle_blur()
             elif event.key == pygame.K_ESCAPE:
                 game_clock = components['game_clock']
                 if game_clock.button_paused:
                     game_clock.resume("player_resumed")
                 elif components['level_transition_screen'].active:
-                    game_clock.button_paused = True
+                    game_clock.pause("player_paused")
                 else:
                     game_clock.pause("player_paused")
         
@@ -124,7 +126,7 @@ def draw_game(screen, components, frame, debug_mode, profile_mode):
 
 def run_game_loop(screen, components, clock):
     """Main game loop"""
-    debug_mode = True
+    debug_mode = False
     profile_mode = False
     running = True
     

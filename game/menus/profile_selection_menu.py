@@ -17,6 +17,7 @@ class ProfileSelectionMenu:
         self.profiles = []
         self.selected_profile = None
         self.mode = "select" # "select" or "create"
+        self.hard_mode = False  # Track if hard mode is activated
         
         # UI elements
         self.profile_rects = []
@@ -33,7 +34,11 @@ class ProfileSelectionMenu:
     
     def draw(self, surface):
         """Draw the profile selection menu"""
-        surface.fill((20, 20, 40))
+        # Background color changes to dark red in hard mode
+        if self.mode == "create" and self.hard_mode:
+            surface.fill((40, 0, 0))  # Dark red background for hard mode
+        else:
+            surface.fill((20, 20, 40))
         
         if self.mode == "select":
             self.draw_profile_list(surface)
@@ -59,9 +64,20 @@ class ProfileSelectionMenu:
             y = start_y + i * (profile_height + spacing)
             
             # Profile box
-            profile_rect = pygame.Rect(50, y, self.screen_rect.width - 150, profile_height)
-            pygame.draw.rect(surface, (60, 60, 80), profile_rect, border_radius=10)
-            pygame.draw.rect(surface, (100, 100, 120), profile_rect, width=2, border_radius=10)
+            is_hard_mode = profile.get('hard_mode', False)
+            if is_hard_mode:
+                # Red outline for hard mode profiles
+                profile_rect = pygame.Rect(45, y-5, self.screen_rect.width - 140, profile_height+10)
+                pygame.draw.rect(surface, (150, 0, 0), profile_rect, border_radius=10)
+                pygame.draw.rect(surface, (100, 0, 0), profile_rect, width=3, border_radius=10)
+                # Inner box
+                profile_rect = pygame.Rect(50, y, self.screen_rect.width - 150, profile_height)
+                pygame.draw.rect(surface, (60, 20, 20), profile_rect, border_radius=10)
+                pygame.draw.rect(surface, (100, 20, 20), profile_rect, width=2, border_radius=10)
+            else:
+                profile_rect = pygame.Rect(50, y, self.screen_rect.width - 150, profile_height)
+                pygame.draw.rect(surface, (60, 60, 80), profile_rect, border_radius=10)
+                pygame.draw.rect(surface, (100, 100, 120), profile_rect, width=2, border_radius=10)
             self.profile_rects.append(profile_rect)
             
             # Profile info
@@ -132,6 +148,12 @@ class ProfileSelectionMenu:
         instruction_rect = instruction_text.get_rect(center=(self.screen_rect.centerx, 150))
         surface.blit(instruction_text, instruction_rect)
         
+        # Hard mode indicator
+        if self.hard_mode:
+            hard_mode_text = self.font.render("HARD MODE ACTIVATED", True, (255, 100, 100))
+            hard_mode_rect = hard_mode_text.get_rect(center=(self.screen_rect.centerx, 200))
+            surface.blit(hard_mode_text, hard_mode_rect)
+        
         # Profile slot buttons
         self.new_profile_buttons = []
         button_size = 100
@@ -178,7 +200,13 @@ class ProfileSelectionMenu:
         surface.blit(back_text, back_text_rect)
     
     def handle_event(self, event):
-        """Handle mouse events for profile selection"""
+        """Handle mouse and keyboard events for profile selection"""
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_LSHIFT or event.key == pygame.K_RSHIFT:
+                if self.mode == "create":
+                    self.hard_mode = not self.hard_mode  # Toggle hard mode
+                    return None
+        
         if event.type != pygame.MOUSEBUTTONDOWN:
             return None
         
@@ -198,6 +226,7 @@ class ProfileSelectionMenu:
             # Check create button
             if self.create_button_rect and self.create_button_rect.collidepoint(pos):
                 self.mode = "create"
+                self.hard_mode = False  # Reset hard mode when entering create mode
                 return None
             
             # Check back button
@@ -208,11 +237,12 @@ class ProfileSelectionMenu:
             # Check profile slot buttons
             for button_rect, profile_num, slot_taken in self.new_profile_buttons:
                 if button_rect.collidepoint(pos) and not slot_taken:
-                    return ("create", profile_num)
+                    return ("create", (profile_num, self.hard_mode))
             
             # Check back button
             if self.back_button_rect and self.back_button_rect.collidepoint(pos):
                 self.mode = "select"
+                self.hard_mode = False  # Reset hard mode when leaving create mode
                 return None
         
         return None

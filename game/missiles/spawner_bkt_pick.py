@@ -78,7 +78,7 @@ class BKTPickSpawner(MissileSpawner):
         if not free_letters: return {}
         
         # Softmax selection over (1 - knowledge) to focus on weakness
-        temperature = 0.2
+        temperature = 0.1
         weights = []
         for letter in free_letters:
             p_k = self.bkt.get_knowledge(letter)

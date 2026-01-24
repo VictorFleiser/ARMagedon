@@ -41,7 +41,8 @@ def setup_game(screen, current_profile, profile_manager):
     row2_height = remaining_height - row1_height
     
     # --- Instantiate panels ---
-    gameplay_section = Gameplay(pygame.Rect(0, 0, game_col_width, SCREEN_HEIGHT), gameplay_logger, game_clock, audio_manager)
+    hard_mode = current_profile.get('hard_mode', False)
+    gameplay_section = Gameplay(pygame.Rect(0, 0, game_col_width, SCREEN_HEIGHT), gameplay_logger, game_clock, audio_manager, hard_mode)
     status_section = StatusPanel(pygame.Rect(game_col_width, 0, ui_col_width, row1_height), gameplay_logger)
     semaphore_section = SemaphorePanel(pygame.Rect(game_col_width, row1_height, ui_col_width, row2_height))
     bonus_section = BonusBar(pygame.Rect(game_col_width, row1_height + row2_height, ui_col_width, row3_height))
@@ -50,7 +51,7 @@ def setup_game(screen, current_profile, profile_manager):
     level_transition_screen = LevelTransitionScreen(pygame.Rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT), game_clock)
     
     # Start background music
-    audio_manager.play_music(volume=0.1)
+    audio_manager.play_music(volume=0.1, hard_mode=hard_mode)
     
     # Cross-references
     gameplay_section.status_panel = status_section

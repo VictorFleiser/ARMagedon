@@ -17,12 +17,13 @@ class AudioManager:
         self._load_sound_effect("powerup_bomb", "powerup_bomb.ogg")
         self._load_sound_effect("powerup_protection", "powerup_protection.ogg")
 
-        # Store music file path
-        self.music_file = self._find_music_file()
+        # Store music file path (will be set when play_music is called)
+        self.music_file = None
     
-    def _find_music_file(self):
+    def _find_music_file(self, hard_mode=False):
         """Find the gameplay music file."""
-        path = self.sounds_dir / "gameplay_music.ogg"
+        music_name = "gameplay_music_hard.ogg" if hard_mode else "gameplay_music.ogg"
+        path = self.sounds_dir / music_name
         if path.exists():
             return str(path)
         return None
@@ -40,8 +41,9 @@ class AudioManager:
         else:
             print(f"[Audio] Sound effect '{name}' not found: {filename}")
     
-    def play_music(self, volume=0.3):
+    def play_music(self, volume=0.3, hard_mode=False):
         """Start playing background music (loops indefinitely)."""
+        self.music_file = self._find_music_file(hard_mode)
         if self.music_file and not self.music_playing:
             try:
                 pygame.mixer.music.load(self.music_file)

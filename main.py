@@ -27,7 +27,7 @@ while main_menu_flag and not quit_game:
             quit_game = True
             main_menu_flag = False
             break
-        elif event.type == pygame.MOUSEBUTTONDOWN:
+        else:
             main_menu.handle_event(event)
     
     if quit_game:
