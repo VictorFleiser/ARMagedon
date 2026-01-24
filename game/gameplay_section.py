@@ -142,7 +142,7 @@ class Gameplay:
             initial_number_of_letters_tested=level_definitions[0],
             overall_knowledge_threshold=0.5,
             spawn_interval=2.0 if hard_mode else 4.0,
-            speed_range=(2, 20) if hard_mode else (12.5, 12.5),
+            speed_range=(3, 20) if hard_mode else (12.5, 12.5),
             hint_min=0.8 if hard_mode else 0.5,
             hint_max=0.95,
             ignore_correct_after_hint=True,
@@ -153,7 +153,7 @@ class Gameplay:
                 'p_t': 0.2, # Transition/learning probability
                 'p_s': 0.1, # Slip probability
                 'p_g': 0.25, # Guess probability
-                'base_decay_rate': 0.045, # knowledge decay rate
+                'base_decay_rate': 0.01, # knowledge decay rate
                 'stability_factor': 0.9 # stability factor for decay adjustment
             }
         )

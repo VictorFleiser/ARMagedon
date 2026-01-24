@@ -22,6 +22,7 @@ class TutorialScreen:
         self.semaphore_a = pygame.image.load(f"{SEMAPHORES_PATH}A.png").convert_alpha()
         self.semaphore_b = pygame.image.load(f"{SEMAPHORES_PATH}B.png").convert_alpha()
         self.semaphore_c = pygame.image.load(f"{SEMAPHORES_PATH}C.png").convert_alpha()
+        self.semaphore_bomb = pygame.image.load(f"{SEMAPHORES_PATH}BOMB.png").convert_alpha()
         self.missile_img = pygame.image.load("assets/sprites/missile.png").convert_alpha()
         self.bonus_life = pygame.image.load("assets/bonus/life_1.png").convert_alpha()
         self.bonus_bomb = pygame.image.load("assets/bonus/bomb_1.png").convert_alpha()
@@ -123,6 +124,18 @@ class TutorialScreen:
         surface.blit(label, (130, y))
         text = font.render("Destroy all missiles", True, (200, 200, 200))
         surface.blit(text, (280, y + 5))
+        # Add bomb semaphore next to text
+        bomb_semaphore_scale = 0.08
+        w, h = self.semaphore_bomb.get_size()
+        scaled_bomb = pygame.transform.scale(self.semaphore_bomb, (int(w * bomb_semaphore_scale), int(h * bomb_semaphore_scale)))
+        bomb_x = 280 + text.get_width() + 20
+        bomb_y = y + 5 + (text.get_height() - scaled_bomb.get_height()) // 2
+        # Draw white background with border
+        padding = 10
+        bg_rect = pygame.Rect(bomb_x - padding, bomb_y - padding, scaled_bomb.get_width() + padding*2, scaled_bomb.get_height() + padding*2)
+        pygame.draw.rect(surface, (255, 255, 255), bg_rect)
+        pygame.draw.rect(surface, (200, 200, 200), bg_rect, 2)
+        surface.blit(scaled_bomb, (bomb_x, bomb_y))
         y += 70
         
         # Protection bonus
