@@ -71,6 +71,7 @@ class Missile:
 
     def on_reach_bottom(self):
         self.gameplay.take_damage()
+        self.gameplay.bonus_bar.reset_increment()
         
         # logging
         self.gameplay.gameplay_logger.missile_hit_ground(self, (self.y - self.start_y) / self.distance)
