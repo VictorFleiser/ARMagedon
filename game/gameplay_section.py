@@ -81,8 +81,8 @@ class Gameplay:
             # Level 5
             ('High_Right', 'Right'), # O
             ('Right', 'Up'), # P
-            # Level 6
             ('Right', 'High_Left'), # Q
+            # Level 6
             ('Right', 'Left'), # R
             ('Right', 'Low_Left'), # S
             # Level 7
@@ -108,7 +108,7 @@ class Gameplay:
                     letter_to_pose[letter] = (left, right)
         
         # Build level_definitions by mapping poses to letters
-        level_sizes = [3, 4, 3, 4, 2, 3, 2, 3, 2]
+        level_sizes = [3, 4, 3, 4, 3, 2, 2, 3, 2]
         assert sum(level_sizes) == len(semaphore_pose_order), "Level sizes do not match number of semaphore poses"
         level_definitions = []
         pose_index = 0

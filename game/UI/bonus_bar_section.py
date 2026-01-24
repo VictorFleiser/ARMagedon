@@ -15,7 +15,9 @@ class BonusBar:
 
 # --- Configuration ---
         # --- State ---
-        self.score_for_full = 4000  # score needed to fill the bar
+        self.base_score_for_full = 3000  # score needed to fill the bar by default
+        self.level_increment = 100  # additional score needed per level
+        self.score_for_full = self.base_score_for_full  # score needed to fill the bar currently
         self.current_score = 0 # Current score in the bar
         self.progress = self.current_score / self.score_for_full    # progress of the bar
         self.displayed_progress = self.progress  # actual progress displayed on the bar (for smooth animation)
@@ -43,6 +45,7 @@ class BonusBar:
         pygame.event.post(event)
         # Reset
         self.current_score -= self.score_for_full
+        self.score_for_full += self.level_increment
         self.progress = self.current_score / self.score_for_full
         self.displayed_progress = 0.0
 
@@ -53,3 +56,7 @@ class BonusBar:
             surface, self.color_fill,
             (self.rect.x, self.rect.y, fill_width, self.rect.height)
         )
+    
+    def reset_increment(self):
+        # Reset score needed for full bar to base value after missile reaches bottom
+        self.score_for_full = self.base_score_for_full
