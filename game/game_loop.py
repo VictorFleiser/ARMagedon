@@ -47,6 +47,8 @@ def handle_events(components, debug_mode, profile_mode):
             elif event.key == pygame.K_p:
                 profile_mode = not profile_mode
                 print(f"Performance profiling: {'ON' if profile_mode else 'OFF'}")
+            elif event.key == pygame.K_b:
+                components['webcam_section'].toggle_blur()
             elif event.key == pygame.K_ESCAPE:
                 game_clock = components['game_clock']
                 if game_clock.button_paused:
