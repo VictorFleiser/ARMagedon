@@ -198,6 +198,11 @@ class ProfileSelectionMenu:
         back_text = self.font.render("Back", True, (255, 255, 255))
         back_text_rect = back_text.get_rect(center=self.back_button_rect.center)
         surface.blit(back_text, back_text_rect)
+        
+        # Hard mode hint
+        hint_text = self.small_font.render("shift: hard mode", True, (100, 100, 100))
+        hint_rect = hint_text.get_rect(bottomright=(self.screen_rect.width - 20, self.screen_rect.height - 20))
+        surface.blit(hint_text, hint_rect)
     
     def handle_event(self, event):
         """Handle mouse and keyboard events for profile selection"""

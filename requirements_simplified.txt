@@ -1,0 +1,7 @@
+matplotlib
+mediapipe
+numpy
+opencv_python
+Pillow
+pygame
+scipy
