@@ -542,6 +542,29 @@ class Gameplay:
         # --- Buildings ---
         self.buildings.draw(surface)
 
+        # --- Letter Knowledge Display (always visible) ---
+        if isinstance(self.spawner, BKTPickSpawner):
+            letter_font = pygame.font.SysFont("Arial", 24, bold=True)
+            x_start = self.rect.left + 10
+            y_pos = self.rect.top + 10
+            x_offset = 0
+            
+            all_letters = self.spawner.available_letters
+            
+            for letter in all_letters:
+                p_k = self.spawner.bkt.get_knowledge(letter)
+                
+                if p_k > 0.5:
+                    color = (0, 255, 0)  # Green
+                elif p_k < 0.2:
+                    color = (255, 0, 0)  # Red
+                else:
+                    color = (128, 128, 128)  # Grey
+                
+                text_surface = letter_font.render(letter, True, color)
+                surface.blit(text_surface, (x_start + x_offset, y_pos))
+                x_offset += text_surface.get_width() + 5  # 5 pixel spacing
+
         # --- Shortcuts info (bottom left) ---
         shortcut_font = pygame.font.SysFont("Arial", 12)
         shortcut_text = "D: Debug | P: Profiler"
