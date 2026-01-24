@@ -10,32 +10,41 @@ BKT Parameters:
 """
 import math
 
+from assets.assets import letters_difficulty, difficulty_BKT_params
+
 class BKTModel:
     def __init__(
         self,
         letters,
         initial_number_of_letters_tested,
-        p_l0=0.0,
-        p_t=0.1,
-        p_s=0.1,
-        p_g=0.25,
-        base_decay_rate=0.03,
-        stability_factor=0.5
+        p_l0,
+        p_t,
+        p_s,
+        p_g,
+        base_decay_rate,
+        stability_factor
     ):
         self.letters = letters
         self.number_of_letters_tested = initial_number_of_letters_tested
-        self.p_l0 = p_l0
-        self.p_t = p_t
-        self.p_s = p_s
-        self.p_g = p_g
         self.base_decay_rate = base_decay_rate
         self.stability_factor = stability_factor
         
         # Initialize knowledge probability for each letter
-        self.p_k = {letter: p_l0 for letter in letters}
+        self.p_k = {letter: difficulty_BKT_params[letters_difficulty[letter]]['p_l0'] for letter in letters}
 
         self.success_score = {letter: 0 for letter in letters}
+
+        print(f"[BKTModel] Initialized with {len(letters)} letters, initial tested: {initial_number_of_letters_tested}")
+        for letter in letters:
+            print(f"  Letter '{letter}': P(L0)={self.p_k[letter]:.4f}, Difficulty='{letters_difficulty[letter]}'")
+            print(f"    BKT Params: {self.get_BKT_parameters(letter)}")
     
+    def get_BKT_parameters(self, letter):
+        """ Return BKT parameters for a given letter based on its difficulty """
+        difficulty = letters_difficulty.get(letter)
+        params = difficulty_BKT_params.get(difficulty)
+        return params
+
     def update_correct(self, letter):
         if letter not in self.p_k:
             return
@@ -45,8 +54,9 @@ class BKTModel:
         # P(K | correct) (Th de Bayes)
         # P(correct | K) = 1 - P(S)
         # P(correct | ~K) = P(G)
-        p_correct_given_k = 1 - self.p_s
-        p_correct_given_not_k = self.p_g
+        p_correct_given_k = 1 - self.get_BKT_parameters(letter)['p_s']
+
+        p_correct_given_not_k = self.get_BKT_parameters(letter)['p_g']
         
         # P(correct) = P(correct | K) * P(K) + P(correct | ~K) * P(~K)
         p_correct = (p_correct_given_k * p_k_prev + 
@@ -59,7 +69,7 @@ class BKTModel:
             p_k_after_evidence = p_k_prev
         
         # learning: P(K) = P(K | correct) + (1 - P(K | correct)) * P(T)
-        self.p_k[letter] = p_k_after_evidence + (1 - p_k_after_evidence) * self.p_t
+        self.p_k[letter] = p_k_after_evidence + (1 - p_k_after_evidence) * self.get_BKT_parameters(letter)['p_t']
         self.p_k[letter] = max(0.0, min(1.0, self.p_k[letter]))
 
         self.success_score[letter] += 1
@@ -73,8 +83,8 @@ class BKTModel:
         # P(K | incorrect) (Th de Bayes)
         # P(incorrect | K) = P(S)
         # P(incorrect | ~K) = 1 - P(G)
-        p_incorrect_given_k = self.p_s
-        p_incorrect_given_not_k = 1 - self.p_g
+        p_incorrect_given_k = self.get_BKT_parameters(letter)['p_s']
+        p_incorrect_given_not_k = 1 - self.get_BKT_parameters(letter)['p_g']
         
         # P(incorrect) = P(incorrect | K) * P(K) + P(incorrect | ~K) * P(~K)
         p_incorrect = (p_incorrect_given_k * p_k_prev + 
@@ -87,7 +97,7 @@ class BKTModel:
             p_k_after_evidence = p_k_prev
         
         # learning: P(K) = P(K | incorrect) + (1 - P(K | incorrect)) * P(T)
-        self.p_k[letter] = p_k_after_evidence + (1 - p_k_after_evidence) * self.p_t
+        self.p_k[letter] = p_k_after_evidence + (1 - p_k_after_evidence) * self.get_BKT_parameters(letter)['p_t']
         self.p_k[letter] = max(0.0, min(1.0, self.p_k[letter]))
 
         self.success_score[letter] = max(0, self.success_score[letter] - 1)
@@ -111,7 +121,7 @@ class BKTModel:
 
     
     def get_knowledge(self, letter):
-        return self.p_k.get(letter, self.p_l0)
+        return self.p_k.get(letter, 0.0)
     
     def get_all_knowledge(self, all_letters=False):
         # all_letters: if True, return knowledge for all letters, else only for tested letters

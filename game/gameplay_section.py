@@ -145,7 +145,7 @@ class Gameplay:
                 'p_t': 0.2, # Transition/learning probability
                 'p_s': 0.1, # Slip probability
                 'p_g': 0.25, # Guess probability
-                'base_decay_rate': 0.045, # knowledge decay rate
+                'base_decay_rate': 0.035, # knowledge decay rate
                 'stability_factor': 0.9 # stability factor for decay adjustment
             }
         )
@@ -446,10 +446,11 @@ class Gameplay:
                 if isinstance(self.spawner, BKTPickSpawner):
                     p_k = self.spawner.bkt.get_knowledge(missile.letter)
                     s_s = self.spawner.bkt.success_score.get(missile.letter, 0)
-                    p_l0 = self.spawner.bkt.p_l0
-                    p_t = self.spawner.bkt.p_t
-                    p_s = self.spawner.bkt.p_s
-                    p_g = self.spawner.bkt.p_g
+                    bkt_params = self.spawner.bkt.get_BKT_parameters(missile.letter)
+                    p_l0 = bkt_params['p_l0']
+                    p_t = bkt_params['p_t']
+                    p_s = bkt_params['p_s']
+                    p_g = bkt_params['p_g']
                     debug_lines.extend([
                         f"P(K): {p_k:.2f} (S: {s_s})",
                         f"P(L0): {p_l0:.2f}",

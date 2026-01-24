@@ -12,16 +12,16 @@ class BKTPickSpawner(MissileSpawner):
         self,
         gameplay,
         available_letters, # letters to spawn
-        initial_number_of_letters_tested=1, # how many different letters to use at start
-        overall_knowledge_threshold=0.5, # average knowledge to increase letter pool
-        spawn_interval=3.0,
-        speed_range=(10.0, 15.0), # missile (lower is faster)
-        hint_min=0.3, # where hint can appear
-        hint_max=0.8,
-        ignore_correct_after_hint=True,
-        bkt_params=None, # dict with BKT parameters (p_l0, p_t, p_s, p_g)
-        use_level_progression=False, # whether to use level-based progression
-        level_definitions=None # list of letter groups for each level
+        initial_number_of_letters_tested, # how many different letters to use at start
+        overall_knowledge_threshold, # average knowledge to increase letter pool
+        spawn_interval,
+        speed_range, # missile (lower is faster)
+        hint_min, # where hint can appear
+        hint_max,
+        ignore_correct_after_hint,
+        bkt_params, # dict with BKT parameters (p_l0, p_t, p_s, p_g)
+        use_level_progression, # whether to use level-based progression
+        level_definitions # list of letter groups for each level
     ):
         super().__init__(gameplay)
         
@@ -49,16 +49,16 @@ class BKTPickSpawner(MissileSpawner):
         # init BKT model
         if bkt_params is None:
             bkt_params = {}
-        
+
         self.bkt = BKTModel(
             letters=available_letters,
             initial_number_of_letters_tested=self.number_of_letters_tested,
-            p_l0=bkt_params.get('p_l0', 0.0), # 0 in theory
-            p_t=bkt_params.get('p_t', 0.1),
-            p_s=bkt_params.get('p_s', 0.1),
-            p_g=bkt_params.get('p_g', 0.25),
-            base_decay_rate=bkt_params.get('base_decay_rate', 0.02),
-            stability_factor=bkt_params.get('stability_factor', 0.5)
+            p_l0=bkt_params.get('p_l0'),
+            p_t=bkt_params.get('p_t'),
+            p_s=bkt_params.get('p_s'),
+            p_g=bkt_params.get('p_g'),
+            base_decay_rate=bkt_params.get('base_decay_rate'),
+            stability_factor=bkt_params.get('stability_factor')
         )
         
         self.timer = 0.0

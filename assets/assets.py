@@ -70,3 +70,64 @@ for i in range(5):
 # TODO: create the missile images and load them here
 missiles_images = []
 
+letters_difficulty = {
+    "A" : "facile",
+    "B" : "facile",
+    "C" : "facile",
+    "D" : "facile",
+    "E" : "moyen",
+    "F" : "facile",
+    "G" : "moyen/dur",
+    "H" : "dur",
+    "I" : "facile/moyen",
+    "J" : "moyen/dur",
+    "K" : "dur",
+    "L" : "moyen",
+    "M" : "moyen",
+    "N" : "facile",
+    "O" : "moyen",
+    "P" : "facile",
+    "Q" : "dur",
+    "R" : "facile/moyen",
+    "S" : "facile",
+    "T" : "facile",
+    "U" : "facile",
+    "V" : "facile",
+    "W" : "facile/moyen",
+    "X" : "facile",
+    "Y" : "moyen",
+    "Z" : "facile"
+}
+
+difficulty_BKT_params = {
+    "facile": {
+        'p_l0': 0.2,
+        'p_t': 0.3,
+        'p_s': 0.05,
+        'p_g': 0.25
+    },
+    "facile/moyen": {
+        'p_l0': 0.18,
+        'p_t': 0.22,
+        'p_s': 0.08,
+        'p_g': 0.30
+    },
+    "moyen": {
+        'p_l0': 0.15,
+        'p_t': 0.2,
+        'p_s': 0.1,
+        'p_g': 0.35
+    },
+    "moyen/dur": {
+        'p_l0': 0.13,
+        'p_t': 0.18,
+        'p_s': 0.12,
+        'p_g': 0.40
+    },
+    "dur": {
+        'p_l0': 0.1,
+        'p_t': 0.15,
+        'p_s': 0.15,
+        'p_g': 0.45
+    }
+}
