@@ -542,29 +542,6 @@ class Gameplay:
         # --- Buildings ---
         self.buildings.draw(surface)
 
-        # --- Letter Knowledge Display (always visible) ---
-        if isinstance(self.spawner, BKTPickSpawner):
-            letter_font = pygame.font.SysFont("Arial", 24, bold=True)
-            x_start = self.rect.left + 10
-            y_pos = self.rect.top + 10
-            x_offset = 0
-            
-            all_letters = self.spawner.available_letters
-            
-            for letter in all_letters:
-                p_k = self.spawner.bkt.get_knowledge(letter)
-                
-                if p_k > 0.5:
-                    color = (0, 255, 0)  # Green
-                elif p_k < 0.2:
-                    color = (255, 0, 0)  # Red
-                else:
-                    color = (128, 128, 128)  # Grey
-                
-                text_surface = letter_font.render(letter, True, color)
-                surface.blit(text_surface, (x_start + x_offset, y_pos))
-                x_offset += text_surface.get_width() + 5  # 5 pixel spacing
-
         # --- Shortcuts info (bottom left) ---
         shortcut_font = pygame.font.SysFont("Arial", 12)
         shortcut_text = "D: Debug | P: Profiler"
@@ -577,6 +554,39 @@ class Gameplay:
         shortcut_bg = pygame.Rect(sx - 4, sy - 2, shortcut_surface.get_width() + 8, shortcut_surface.get_height() + 4)
         self.draw_transparent_rect(surface, (0, 0, 0, 100), shortcut_bg)
         surface.blit(shortcut_surface, (sx, sy))
+
+        # --- Letter knowledge display (bottom center) ---
+        letter_font = pygame.font.SysFont("Arial", 32, bold=True)
+        if isinstance(self.spawner, BKTPickSpawner):
+            all_letters = self.spawner.available_letters[:self.spawner.number_of_letters_tested]
+            letter_surfaces = []
+            for letter in all_letters:
+                p_k = self.spawner.bkt.get_knowledge(letter)
+                if p_k == 0:
+                    color = (128, 128, 128) # grey
+                elif p_k > 0.6:
+                    color = (0, 128, 128) # green-cyan
+                elif p_k > 0.5:
+                    color = (32, 128, 0) # dark green
+                elif p_k >= 0.3:
+                    color = (255, 165, 0) # orange
+                else:
+                    color = (255, 0, 0) # red
+                surf = letter_font.render(letter, True, color)
+                letter_surfaces.append((surf, letter))
+            
+            if letter_surfaces:
+                spacing = 5
+                total_width = sum(surf.get_width() for surf, _ in letter_surfaces) + (len(letter_surfaces) - 1) * spacing
+                start_x = self.rect.left + (self.rect.width - total_width) // 2
+                y = self.rect.bottom - 85
+                # Transparent bar behind letters
+                bar_height = letter_font.get_height() + 10
+                bar_rect = pygame.Rect(start_x - spacing//2, y - 5, total_width + spacing, bar_height)
+                self.draw_transparent_rect(surface, (255, 255, 255, 220), bar_rect)
+                for surf, letter in letter_surfaces:
+                    surface.blit(surf, (start_x, y))
+                    start_x += surf.get_width() + spacing
 
     # -------------------------------------------------------
     #                  Missile management
