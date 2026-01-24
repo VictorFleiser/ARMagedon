@@ -54,7 +54,7 @@ def handle_events(components, debug_mode, profile_mode):
                 if game_clock.button_paused:
                     game_clock.resume("player_resumed")
                 elif components['level_transition_screen'].active:
-                    game_clock.button_paused = True
+                    game_clock.pause("player_paused")
                 else:
                     game_clock.pause("player_paused")
         

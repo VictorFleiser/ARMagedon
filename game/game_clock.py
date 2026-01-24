@@ -16,13 +16,13 @@ class GameClock:
         # Set appropriate pause flag
         if reason == "player_paused":
             self.button_paused = True
+            self.audio_manager.pause_music()
         elif reason == "level_transition":
             self.transition_paused = True
         else:
             print(f"Unknown pause reason: {reason}")
             return
         self.paused = True
-        self.audio_manager.pause_music()
 
         # Log pause event
         self.gameplay_logger.pause(reason)
@@ -31,6 +31,7 @@ class GameClock:
     def resume(self, reason):
         if reason == "player_resumed":
             self.button_paused = False
+            self.audio_manager.resume_music()
         elif reason == "level_transition_complete":
             self.transition_paused = False
         else:
@@ -39,7 +40,6 @@ class GameClock:
         # Only unpause if both pause flags are false
         if not self.button_paused and not self.transition_paused:
             self.paused = False
-            self.audio_manager.resume_music()
 
             # Log resume event
             self.gameplay_logger.resume(reason)
