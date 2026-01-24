@@ -1,6 +1,8 @@
 import json
 import math
 from collections import defaultdict
+import bisect
+import statistics
 import plotly.graph_objects as go
 
 # ============================
@@ -11,9 +13,10 @@ LOG_FILE = "logs/gameplay_logs_Victor30min.jsonl"
 LOG_FILE = "logs/gameplay_logs_Victor25min.jsonl"
 LOG_FILE = "logs/gameplay_logs_Vic_random_30min.jsonl"
 
-
-
-
+# FLAGS for computations : each flag slows down the creation of the plot quite a bit, turn off if not needed
+COMPUTE_MIN_KNOWLEDGE = True
+COMPUTE_AVERAGE_KNOWLEDGE = True
+COMPUTE_MEDIAN_KNOWLEDGE = True
 
 DISPLAY_PAUSED = False        # True = flat during pause, False = cut pause out		# DO NOT SET TO TRUE, IT DOENS'T SEEM TO WORK
 DT_SAMPLING = 0.1
@@ -167,20 +170,6 @@ for letter in sorted(times.keys()):
     )
 
 # --- Event markers ---
-# for event, color in EVENTS_TO_MARK.items():
-#     for t in event_times.get(event, []):
-#         fig.add_trace(
-#             go.Scatter(
-#                 x=[t, t],
-#                 y=[0, 1],
-#                 mode="lines",
-#                 line=dict(color=color, dash="dot"),
-#                 name=event,
-#                 showlegend=True
-#             )
-#         )
-
-# --- Event markers ---
 for event, color in EVENTS_TO_MARK.items():
     times_for_event = event_times.get(event, [])
     if not times_for_event:
@@ -211,6 +200,94 @@ for event, color in EVENTS_TO_MARK.items():
                 showlegend=False,
             )
         )
+
+# ============================
+# Compute minimum knowledge curve
+# ============================
+
+if COMPUTE_MIN_KNOWLEDGE :
+    all_times = sorted(
+    set(t for letter in times for t in times[letter])
+    )
+
+    min_values = []
+    for t in all_times:
+        active_values = []
+        for letter in times:
+            # Use binary search to find latest value at or before time t
+            idx = bisect.bisect_right(times[letter], t) - 1
+            if idx >= 0:
+                active_values.append(values[letter][idx])
+        min_values.append(min(active_values) if active_values else 0)
+    
+    # trace for minimum knowledge
+    fig.add_trace(
+        go.Scatter(
+            x=all_times,
+            y=min_values,
+            mode="lines",
+            name="Minimum knowledge (all letters)",
+            line=dict(width=4, color="black"),
+        )
+    )
+
+
+# Compute average and median knowledge
+if COMPUTE_AVERAGE_KNOWLEDGE or COMPUTE_MEDIAN_KNOWLEDGE :
+
+    avg_values = []
+    median_values = []
+    for t in all_times:
+        active_values = []
+        for letter in times:
+            # Use binary search to find latest value at or before time t
+            idx = bisect.bisect_right(times[letter], t) - 1
+            if idx >= 0:
+                active_values.append(values[letter][idx])
+        if active_values:
+            if COMPUTE_AVERAGE_KNOWLEDGE:
+                avg_values.append(statistics.mean(active_values))
+            if COMPUTE_MEDIAN_KNOWLEDGE:
+                median_values.append(statistics.median(active_values))
+        else:
+            avg_values.append(0)
+            median_values.append(0)
+
+    if COMPUTE_AVERAGE_KNOWLEDGE :
+        # trace for average knowledge
+        fig.add_trace(
+            go.Scatter(
+                x=all_times,
+                y=avg_values,
+                mode="lines",
+                name="Average knowledge (all letters)",
+                line=dict(width=3, color="blue"),
+            )
+        )
+
+    if COMPUTE_MEDIAN_KNOWLEDGE :
+        # trace for median knowledge
+        fig.add_trace(
+            go.Scatter(
+                x=all_times,
+                y=median_values,
+                mode="lines",
+                name="Median knowledge (all letters)",
+                line=dict(width=3, color="green"),
+            )
+        )
+
+# --- Knowledge threshold line ---
+if all_times:
+    fig.add_trace(
+        go.Scatter(
+            x=[0, max(all_times)],
+            y=[0.5, 0.5],
+            mode="lines",
+            name="Knowledge threshold (0.5)",
+            line=dict(width=2, dash="dot", color="black"),
+        )
+    )
 
 max_time = max((max(times[letter]) for letter in times if times[letter]), default=0)
 tickvals = list(range(0, int(max_time) + 1, 60))
