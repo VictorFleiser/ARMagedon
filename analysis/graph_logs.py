@@ -4,6 +4,8 @@ from collections import defaultdict
 import bisect
 import statistics
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+from statsmodels.nonparametric.smoothers_lowess import lowess
 
 # ============================
 # Configuration
@@ -24,6 +26,16 @@ DT_SAMPLING = 0.1
 BASE_DECAY_RATE_DEFAULT = 0.035
 STABILITY_FACTOR_DEFAULT = 0.9
 
+LOWESS_FRAC = 0.1   # smoothing strength for the missile progress curve (smaller = more reactive)
+
+# Trace registries for toggles
+TRACE_GROUPS = {
+    "knowledge": [],
+    "missiles": [],
+    "events": {},
+    "knowledge_summary": [],
+}
+
 EVENTS_TO_MARK = {
     "missile_hit_ground": "red",
     "missile_hint_shown": "orange",
@@ -31,6 +43,8 @@ EVENTS_TO_MARK = {
     "bonus_bar_filled": "green",
     "semaphore_completed:BOMB": "purple",
 }
+for evt in EVENTS_TO_MARK:
+    TRACE_GROUPS["events"][evt] = []
 
 # ============================
 # State containers
@@ -47,6 +61,15 @@ times = defaultdict(list)
 values = defaultdict(list)
 
 event_times = defaultdict(list)
+
+# ============================
+# Missile state containers
+# ============================
+missiles = {
+    "destroyed_no_bomb": {"x": [], "y": []},
+    "destroyed_bomb": {"x": [], "y": []},
+    "hit_ground": {"x": [], "y": [], "size": []},
+}
 
 # ============================
 # Helper functions
@@ -146,6 +169,22 @@ for log in logs:
 
         times[letter].append(logical_time)
         values[letter].append(p_k[letter])
+    
+    # --- Missile events ---
+    if event == "missile_destroyed":
+        progress = log["progress"]
+        if log.get("bomb_used", False):
+            missiles["destroyed_bomb"]["x"].append(logical_time)
+            missiles["destroyed_bomb"]["y"].append(progress)
+        else:
+            missiles["destroyed_no_bomb"]["x"].append(logical_time)
+            missiles["destroyed_no_bomb"]["y"].append(progress)
+
+    if event == "missile_hit_ground":
+        progress = log["progress"]
+        missiles["hit_ground"]["x"].append(logical_time)
+        missiles["hit_ground"]["y"].append(progress)
+        missiles["hit_ground"]["size"].append(14 if progress >= 1.0 else 8)
 
 # ============================
 # Final decay extension
@@ -156,7 +195,37 @@ for letter in letters_active:
 # ============================
 # Plotly figure
 # ============================
-fig = go.Figure()
+fig = make_subplots(specs=[[{"secondary_y": True}]])
+
+fig.update_layout(
+    legend=dict(
+        groupclick="toggleitem"
+    )
+)
+
+def toggle_group(indices, visible):
+    # When hiding via buttons, use legendonly so the legend entry stays visible
+    target_visibility = True if visible else "legendonly"
+    return [
+        {
+            "visible": target_visibility,
+        },
+        indices,
+    ]
+
+def toggle_group_event(visible):
+    # Toggle all event traces together; keep legend entries visible
+    target_visibility = True if visible else "legendonly"
+    event_indices = []
+    for evt in EVENTS_TO_MARK:
+        event_indices.extend(TRACE_GROUPS["events"].get(evt, []))
+    return [
+        {
+            "visible": target_visibility,
+        },
+        event_indices,
+    ]
+
 
 # --- Letter curves ---
 for letter in sorted(times.keys()):
@@ -165,9 +234,11 @@ for letter in sorted(times.keys()):
             x=times[letter],
             y=values[letter],
             mode="lines",
-            name=f"Letter {letter}"
+            name=f"Letter {letter}",
+            legendgroup="knowledge"
         )
     )
+    TRACE_GROUPS["knowledge"].append(len(fig.data) - 1)
 
 # --- Event markers ---
 for event, color in EVENTS_TO_MARK.items():
@@ -185,8 +256,10 @@ for event, color in EVENTS_TO_MARK.items():
             name=event,
             legendgroup=event,
             showlegend=True,
+            # legendgroup="events"
         )
     )
+    TRACE_GROUPS["events"][event].append(len(fig.data) - 1)
 
     # Remaining traces: same legend group, hidden from legend
     for t in times_for_event[1:]:
@@ -198,17 +271,20 @@ for event, color in EVENTS_TO_MARK.items():
                 line=dict(color=color, dash="dot"),
                 legendgroup=event,
                 showlegend=False,
+                # legendgroup="events"
             )
         )
-
+    TRACE_GROUPS["events"][event].extend(
+        range(len(fig.data) - len(times_for_event) + 1, len(fig.data))
+    )
 # ============================
 # Compute minimum knowledge curve
 # ============================
 
-if COMPUTE_MIN_KNOWLEDGE :
-    all_times = sorted(
+all_times = sorted(
     set(t for letter in times for t in times[letter])
-    )
+)
+if COMPUTE_MIN_KNOWLEDGE :
 
     min_values = []
     for t in all_times:
@@ -228,9 +304,10 @@ if COMPUTE_MIN_KNOWLEDGE :
             mode="lines",
             name="Minimum knowledge (all letters)",
             line=dict(width=4, color="black"),
+            legendgroup="knowledge_summary"
         )
     )
-
+    TRACE_GROUPS["knowledge_summary"].append(len(fig.data) - 1)
 
 # Compute average and median knowledge
 if COMPUTE_AVERAGE_KNOWLEDGE or COMPUTE_MEDIAN_KNOWLEDGE :
@@ -262,8 +339,10 @@ if COMPUTE_AVERAGE_KNOWLEDGE or COMPUTE_MEDIAN_KNOWLEDGE :
                 mode="lines",
                 name="Average knowledge (all letters)",
                 line=dict(width=3, color="blue"),
+                legendgroup="knowledge_summary"
             )
         )
+        TRACE_GROUPS["knowledge_summary"].append(len(fig.data) - 1)
 
     if COMPUTE_MEDIAN_KNOWLEDGE :
         # trace for median knowledge
@@ -274,8 +353,10 @@ if COMPUTE_AVERAGE_KNOWLEDGE or COMPUTE_MEDIAN_KNOWLEDGE :
                 mode="lines",
                 name="Median knowledge (all letters)",
                 line=dict(width=3, color="green"),
+                legendgroup="knowledge_summary"
             )
         )
+        TRACE_GROUPS["knowledge_summary"].append(len(fig.data) - 1)
 
 # --- Knowledge threshold line ---
 if all_times:
@@ -288,13 +369,14 @@ if all_times:
             line=dict(width=2, dash="dot", color="black"),
         )
     )
+    TRACE_GROUPS["knowledge_summary"].append(len(fig.data) - 1)
 
 max_time = max((max(times[letter]) for letter in times if times[letter]), default=0)
 tickvals = list(range(0, int(max_time) + 1, 60))
 ticktext = [f"{int(v // 60)}:{int(v % 60):02d}" for v in tickvals] # mm:ss format
 
 fig.update_layout(
-    title="Knowledge Evolution per Letter",
+    # title="Knowledge Evolution per Letter",
     xaxis_title="Game Time (mm:ss)",
     yaxis_title="Knowledge p_k",
     yaxis=dict(range=[0, 1.05]),
@@ -303,6 +385,174 @@ fig.update_layout(
         tickvals=tickvals,
         ticktext=ticktext
     )
+)
+
+fig.update_yaxes(
+    title_text="Knowledge p_k",
+    range=[0, 1.05],
+    secondary_y=False,
+)
+
+fig.update_yaxes(
+    title_text="Missile progress",
+    range=[0, 1.05],
+    autorange="reversed",
+    secondary_y=True,
+)
+
+# ============================
+# Missile scatter plots
+# ============================
+fig.add_trace(
+    go.Scatter(
+        x=missiles["destroyed_no_bomb"]["x"],
+        y=missiles["destroyed_no_bomb"]["y"],
+        mode="markers",
+        name="Destroyed (no bomb)",
+        marker=dict(color="green", size=8),
+        legendgroup="missiles",
+    ),
+    secondary_y=True,
+)
+TRACE_GROUPS["missiles"].append(len(fig.data) - 1)
+
+fig.add_trace(
+    go.Scatter(
+        x=missiles["destroyed_bomb"]["x"],
+        y=missiles["destroyed_bomb"]["y"],
+        mode="markers",
+        name="Destroyed (bomb)",
+        marker=dict(color="blue", size=8),
+        legendgroup="missiles",
+    ),
+    secondary_y=True,
+)
+TRACE_GROUPS["missiles"].append(len(fig.data) - 1)
+
+fig.add_trace(
+    go.Scatter(
+        x=missiles["hit_ground"]["x"],
+        y=missiles["hit_ground"]["y"],
+        mode="markers",
+        name="Hit ground",
+        marker=dict(
+            color="red",
+            size=missiles["hit_ground"]["size"],
+        ),
+        legendgroup="missiles",
+    ),
+    secondary_y=True,
+)
+TRACE_GROUPS["missiles"].append(len(fig.data) - 1)
+
+# ============================
+# LOWESS regression curves for missiles
+# ============================
+def add_lowess(x, y, name, color):
+    if len(x) < 5:
+        return
+    smoothed = lowess(y, x, frac=LOWESS_FRAC, return_sorted=True)
+    fig.add_trace(
+        go.Scatter(
+            x=smoothed[:, 0],
+            y=smoothed[:, 1],
+            mode="lines",
+            name=name,
+            line=dict(color=color, width=3),
+            legendgroup="missiles",
+        ),
+        secondary_y=True,
+    )
+    TRACE_GROUPS["missiles"].append(len(fig.data) - 1)
+
+add_lowess(
+    missiles["destroyed_no_bomb"]["x"],
+    missiles["destroyed_no_bomb"]["y"],
+    "Trend: destroyed (no bomb)",
+    "darkgreen",
+)
+
+add_lowess(
+    missiles["destroyed_bomb"]["x"],
+    missiles["destroyed_bomb"]["y"],
+    "Trend: destroyed (bomb)",
+    "darkblue",
+)
+
+add_lowess(
+    missiles["hit_ground"]["x"],
+    missiles["hit_ground"]["y"],
+    "Trend: hit ground",
+    "darkred",
+)
+
+
+# ============================
+# Buttons to toggle visibility
+# ============================
+
+def mask_for(group):
+    return [
+        (trace.legendgroup == group)
+        for trace in fig.data
+    ]
+
+fig.update_layout(
+    updatemenus=[
+        dict(
+            type="buttons",
+            direction="right",
+            x=0.5,
+            y=1.18,
+            showactive=True,
+            buttons=[
+                dict(
+                    label="Toggle Knowledge",
+                    method="restyle",
+                    args=toggle_group(TRACE_GROUPS["knowledge"], False),
+                    args2=toggle_group(TRACE_GROUPS["knowledge"], True),
+                ),
+                dict(
+                    label="Toggle Missiles",
+                    method="restyle",
+                    args=toggle_group(TRACE_GROUPS["missiles"], False),
+                    args2=toggle_group(TRACE_GROUPS["missiles"], True),
+                ),
+                dict(
+                    label="Toggle Events",
+                    method="restyle",
+                    args=toggle_group_event(False),
+                    args2=toggle_group_event(True),
+                ),
+                dict(
+                    label="Toggle Summary",
+                    method="restyle",
+                    args=toggle_group(TRACE_GROUPS["knowledge_summary"], False),
+                    args2=toggle_group(TRACE_GROUPS["knowledge_summary"], True),
+                ),
+                dict(
+                    label="Show All",
+                    method="restyle",
+                    args=[
+                        {
+                            "visible": True,
+                        },
+                        list(range(len(fig.data))),
+                    ],
+                ),
+                dict(
+                    label="Hide All",
+                    method="restyle",
+                    args=[
+                        {
+                            "visible": "legendonly",
+                        },
+                        list(range(len(fig.data))),
+                    ],
+                ),
+            ],
+        )
+    ]
 )
 
 fig.show()
