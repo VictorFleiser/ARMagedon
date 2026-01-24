@@ -16,7 +16,13 @@ from game.other_gameplay.buildings import BuildingGrid
 class Gameplay:
     def __init__(self, rect, gameplay_logger, game_clock, audio_manager):
         # --- Initialization ---
-        self.background_image = pygame.image.load("assets/sprites/gameplay_bg.png").convert()
+        # Load background images for different levels
+        self.background_images = {
+            'day': pygame.image.load("assets/sprites/gameplay_bg_day.jpg").convert(),
+            'sunrise': pygame.image.load("assets/sprites/gameplay_bg_sunrise.jpg").convert(),
+            'sunset': pygame.image.load("assets/sprites/gameplay_bg_sunset.jpg").convert()
+        }
+        self.background_image = self.background_images['day']  # Default to day
         self.grid_size = 10
         self.rect = rect
         self.gameplay_logger = gameplay_logger
@@ -67,17 +73,18 @@ class Gameplay:
             # Level 5
             ('High_Right', 'Right'), # O
             ('Right', 'Up'), # P
+            # Level 6
             ('Right', 'High_Left'), # Q
             ('Right', 'Left'), # R
             ('Right', 'Low_Left'), # S
-            # Level 6
+            # Level 7
             ('High_Right', 'Up'), # T
             ('High_Right', 'High_Left'), # U
-            # Level 7
+            # Level 8
             ('Up', 'Low_Left'), # V
             ('Left', 'High_Left'), # W
             ('Low_Left', 'High_Left'), # X
-            # Level 8: Remaining complex
+            # Level 9: Remaining complex
             ('High_Right', 'Left'), # Y
             ('Low_Left', 'Left'), # Z
         ]
@@ -93,7 +100,8 @@ class Gameplay:
                     letter_to_pose[letter] = (left, right)
         
         # Build level_definitions by mapping poses to letters
-        level_sizes = [3, 4, 3, 4, 5, 2, 3, 2]
+        level_sizes = [3, 4, 3, 4, 2, 3, 2, 3, 2]
+        assert sum(level_sizes) == len(semaphore_pose_order), "Level sizes do not match number of semaphore poses"
         level_definitions = []
         pose_index = 0
         
@@ -382,6 +390,15 @@ class Gameplay:
         surface.blit(shape_surf, rect)
 
     def draw_gameplay(self, surface, debug_mode=False):
+        # --- Select background based on level ---
+        current_level = self.spawner.get_current_level() + 1  # Convert to 1-indexed
+        if current_level <= 3:
+            self.background_image = self.background_images['day']
+        elif current_level <= 7:
+            self.background_image = self.background_images['sunrise']
+        else:
+            self.background_image = self.background_images['sunset']
+        
         # --- Background ---
         bg = pygame.transform.smoothscale(
             self.background_image,

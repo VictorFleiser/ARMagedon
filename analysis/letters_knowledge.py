@@ -205,12 +205,20 @@ for event, color in EVENTS_TO_MARK.items():
             )
         )
 
+max_time = max((max(times[letter]) for letter in times if times[letter]), default=0)
+tickvals = list(range(0, int(max_time) + 1, 60))
+ticktext = [f"{int(v // 60)}:{int(v % 60):02d}" for v in tickvals] # mm:ss format
+
 fig.update_layout(
     title="Knowledge Evolution per Letter",
-    xaxis_title="Game Time (seconds)",
+    xaxis_title="Game Time (mm:ss)",
     yaxis_title="Knowledge p_k",
     yaxis=dict(range=[0, 1.05]),
     hovermode="x unified",
+    xaxis=dict(
+        tickvals=tickvals,
+        ticktext=ticktext
+    )
 )
 
 fig.show()
