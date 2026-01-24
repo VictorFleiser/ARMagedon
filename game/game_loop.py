@@ -126,7 +126,7 @@ def draw_game(screen, components, frame, debug_mode, profile_mode):
 
 def run_game_loop(screen, components, clock):
     """Main game loop"""
-    debug_mode = True
+    debug_mode = False
     profile_mode = False
     running = True
     
