@@ -14,20 +14,28 @@ from game.effects.floating_text import FloatingTextEffect
 from game.other_gameplay.buildings import BuildingGrid
 
 class Gameplay:
-    def __init__(self, rect, gameplay_logger, game_clock, audio_manager):
+    def __init__(self, rect, gameplay_logger, game_clock, audio_manager, hard_mode=False):
         # --- Initialization ---
         # Load background images for different levels
-        self.background_images = {
-            'day': pygame.image.load("assets/sprites/gameplay_bg_day.jpg").convert(),
-            'sunrise': pygame.image.load("assets/sprites/gameplay_bg_sunrise.jpg").convert(),
-            'sunset': pygame.image.load("assets/sprites/gameplay_bg_sunset.jpg").convert()
-        }
+        if hard_mode:
+            self.background_images = {
+                'day': pygame.image.load("assets/sprites/gameplay_bg_hard.jpg").convert(),
+                'sunrise': pygame.image.load("assets/sprites/gameplay_bg_hard.jpg").convert(),
+                'sunset': pygame.image.load("assets/sprites/gameplay_bg_hard.jpg").convert()
+            }
+        else:
+            self.background_images = {
+                'day': pygame.image.load("assets/sprites/gameplay_bg_day.jpg").convert(),
+                'sunrise': pygame.image.load("assets/sprites/gameplay_bg_sunrise.jpg").convert(),
+                'sunset': pygame.image.load("assets/sprites/gameplay_bg_sunset.jpg").convert()
+            }
         self.background_image = self.background_images['day']  # Default to day
         self.grid_size = 10
         self.rect = rect
         self.gameplay_logger = gameplay_logger
         self.game_clock = game_clock
         self.audio_manager = audio_manager
+        self.hard_mode = hard_mode
         # # --- Debug mode (terminal display from the initial code back in september/october) ---
         # self.debug_terminal = False
         # self.font = pygame.font.SysFont("Consolas", 18)
@@ -133,9 +141,9 @@ class Gameplay:
             available_letters=available_letters,
             initial_number_of_letters_tested=level_definitions[0],
             overall_knowledge_threshold=0.5,
-            spawn_interval=4.0,
-            speed_range=(12.5, 12.5),
-            hint_min=0.5,
+            spawn_interval=2.0 if hard_mode else 4.0,
+            speed_range=(2, 20) if hard_mode else (12.5, 12.5),
+            hint_min=0.8 if hard_mode else 0.5,
             hint_max=0.95,
             ignore_correct_after_hint=True,
             use_level_progression=True,

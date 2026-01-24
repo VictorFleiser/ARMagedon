@@ -173,13 +173,20 @@ class MainMenu():
                             # Tutorial already completed - start game
                             self.start_game_callback()
                     elif action == "create":
-                        # Create new profile with selected number
-                        profile = self.profile_manager.create_profile(data)
+                        # Create new profile with selected number and hard mode flag
+                        profile_num, hard_mode = data
+                        profile = self.profile_manager.create_profile(profile_num, hard_mode=hard_mode)
                         self.selected_profile = profile
                         
-                        # New profiles need to complete tutorial
-                        self.setup_tutorial()
-                        self.menu = "Tutorial"
+                        if hard_mode:
+                            # Hard mode profiles skip tutorial
+                            self.profile_manager.current_profile['tutorial_completed'] = True
+                            self.profile_manager.save_profile()
+                            self.start_game_callback()
+                        else:
+                            # New normal profiles need to complete tutorial
+                            self.setup_tutorial()
+                            self.menu = "Tutorial"
                     elif action == "delete":
                         # Delete profile
                         self.profile_manager.delete_profile(data['filepath'])

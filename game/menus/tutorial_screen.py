@@ -206,6 +206,10 @@ class TutorialScreen:
             self.hold_time = max(0, self.hold_time - dt)
             self.last_detected = detected_semaphore
     
+    def handle_event(self, event):
+        """Handle events (currently no user input needed for tutorial)"""
+        pass
+    
     def draw(self, surface):
         """ Draw the tutorial screen """
         surface.fill((10, 10, 30))

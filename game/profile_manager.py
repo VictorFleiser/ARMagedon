@@ -10,7 +10,7 @@ class ProfileManager:
         self.profiles_dir.mkdir(parents=True, exist_ok=True)
         self.current_profile = None
     
-    def create_profile(self, profile_number, player_name="Player"):
+    def create_profile(self, profile_number, player_name="Player", hard_mode=False):
         """ Create a new profile with given number (1-5) """
         if profile_number < 1 or profile_number > 5:
             raise ValueError("Profile number must be between 1 and 5")
@@ -24,6 +24,7 @@ class ProfileManager:
             "total_playtime_seconds": 0.0,
             "current_level": 0,
             "tutorial_completed": False,
+            "hard_mode": hard_mode,  # New flag for hard mode
             "success_score": {}, # Success count for each letter (used for short-term decay and persistence)
             "long_term_score": {}, # Long-term mastery score (increases when success_score >= 10 at session end)
             "long_term_decay_params": {
@@ -32,8 +33,9 @@ class ProfileManager:
             }
         }
         
-        # Save to file
-        filepath = self.profiles_dir / f"profile_{profile_number}_{timestamp.strftime('%Y%m%d_%H%M%S')}.json"
+        # Save to file with "hard" suffix if hard mode
+        suffix = "_hard" if hard_mode else ""
+        filepath = self.profiles_dir / f"profile_{profile_number}{suffix}_{timestamp.strftime('%Y%m%d_%H%M%S')}.json"
         with open(filepath, 'w') as f:
             json.dump(profile_data, f, indent=2)
         
