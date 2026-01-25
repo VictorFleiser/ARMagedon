@@ -6,7 +6,7 @@ import pygame
 from game.profile_manager import ProfileManager
 
 class ProfileSelectionMenu:
-    def __init__(self, screen_rect, profile_manager):
+    def __init__(self, screen_rect, profile_manager, hard_mode=False):
         self.screen_rect = screen_rect
         self.profile_manager = profile_manager
         
@@ -17,7 +17,7 @@ class ProfileSelectionMenu:
         self.profiles = []
         self.selected_profile = None
         self.mode = "select" # "select" or "create"
-        self.hard_mode = False  # Track if hard mode is activated
+        self.hard_mode = hard_mode  # Track if hard mode is activated
         
         # UI elements
         self.profile_rects = []
@@ -231,7 +231,7 @@ class ProfileSelectionMenu:
             # Check create button
             if self.create_button_rect and self.create_button_rect.collidepoint(pos):
                 self.mode = "create"
-                self.hard_mode = False  # Reset hard mode when entering create mode
+                # Preserve current hard_mode state when entering create mode
                 return None
             
             # Check back button
@@ -247,7 +247,7 @@ class ProfileSelectionMenu:
             # Check back button
             if self.back_button_rect and self.back_button_rect.collidepoint(pos):
                 self.mode = "select"
-                self.hard_mode = False  # Reset hard mode when leaving create mode
+                # Preserve current hard_mode state when leaving create mode
                 return None
         
         return None
