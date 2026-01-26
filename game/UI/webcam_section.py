@@ -190,9 +190,24 @@ class WebcamPanel:
         # Blur mode: 0=no blur, 1=blur face, 2=blur everywhere, 3=both
         self.blur_mode = 0
 
+        # Display mode: 0=all, 1=camera only, 2=skeleton only, 3=skeleton + overlay
+        self.display_mode = 0
+
+        # Store latest results for drawing
+        self.latest_results = None
+        self.latest_body_center = None
+        self.latest_physical_right_hand_pos = None
+        self.latest_physical_left_hand_pos = None
+        self.latest_detected_semaphore = None
+
     def toggle_blur(self):
         self.blur_mode = (self.blur_mode + 1) % 4
         print(f"Blur mode: {self.blur_mode}")
+
+    def toggle_display_mode(self):
+        self.display_mode = (self.display_mode + 1) % 4
+        modes = ["All", "Camera only", "Mediapipe skeleton only", "Mediapipe skeleton + overlay"]
+        print(f"Display mode: {modes[self.display_mode]}")
 
     def update(self):
         ret, frame = cap.read()
@@ -207,114 +222,6 @@ class WebcamPanel:
         results = self.holistic.process(rgb_image)
         rgb_image.flags.writeable = True
         
-        body_center = None
-        if results.pose_landmarks:
-            mp_drawing.draw_landmarks(frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
-            
-            # Body Center Calculation
-            left_shoulder = results.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_SHOULDER]
-            right_shoulder = results.pose_landmarks.landmark[mp_pose.PoseLandmark.RIGHT_SHOULDER]
-            nose = results.pose_landmarks.landmark[mp_pose.PoseLandmark.NOSE]
-            
-            if left_shoulder.visibility > 0.5 and right_shoulder.visibility > 0.5 and nose.visibility > 0.5:
-                shoulder_mid_x = (left_shoulder.x + right_shoulder.x) / 2
-                shoulder_mid_y = (left_shoulder.y + right_shoulder.y) / 2
-                
-                # Average the Y of the shoulder midpoint and the nose
-                body_center_x = shoulder_mid_x * image_width
-                body_center_y = ((shoulder_mid_y + nose.y) / 2) * image_height
-                
-                body_center = (int(body_center_x), int(body_center_y))
-                cv2.circle(frame, body_center, 7, (255, 0, 0), -1) # Blue circle
-
-                draw_additional_guidelines(frame, body_center)
-
-        # Hand position detection
-        physical_right_hand_pos = None # User's right hand (screen left)
-        physical_left_hand_pos = None  # User's left hand (screen right)
-
-        # Right hand (Screen Left)
-        right_hand_coords = None
-        if results.left_hand_landmarks:
-            mp_drawing.draw_landmarks(frame, results.left_hand_landmarks, mp_holistic.HAND_CONNECTIONS)
-            right_hand_coords = get_palm_top_coords(results.left_hand_landmarks, image_width, image_height)
-        elif results.pose_landmarks:
-            wrist = results.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_WRIST]
-            if wrist.visibility > 0.5:
-                right_hand_coords = (int(wrist.x * image_width), int(wrist.y * image_height))
-        
-        if right_hand_coords and body_center:
-            angle = calculate_angle(body_center, right_hand_coords)
-            physical_right_hand_pos = get_hand_position(angle)
-            if physical_right_hand_pos:
-                cv2.putText(frame, f'Right Hand (Screen): {physical_right_hand_pos}', (10, 60),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (200, 200, 0), 2)
-        
-        # Store for debug visualization
-        self.debug_right_hand_coords = right_hand_coords
-        self.debug_body_center = body_center
-
-        # Left hand (Screen Right)
-        left_hand_coords = None
-        if results.right_hand_landmarks:
-            mp_drawing.draw_landmarks(frame, results.right_hand_landmarks, mp_holistic.HAND_CONNECTIONS)
-            left_hand_coords = get_palm_top_coords(results.right_hand_landmarks, image_width, image_height)
-        elif results.pose_landmarks:
-            wrist = results.pose_landmarks.landmark[mp_pose.PoseLandmark.RIGHT_WRIST]
-            if wrist.visibility > 0.5:
-                left_hand_coords = (int(wrist.x * image_width), int(wrist.y * image_height))
-        
-        if left_hand_coords and body_center:
-            angle = calculate_angle(body_center, left_hand_coords)
-            physical_left_hand_pos = get_hand_position(angle)
-            if physical_left_hand_pos:
-                cv2.putText(frame, f'Left Hand (Screen): {physical_left_hand_pos}', (10, 30),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
-        
-        # Store for debug visualization
-        self.debug_left_hand_coords = left_hand_coords
-            
-        # Logging
-        if self.valid_landmarks_flag :
-            if not (left_hand_coords and right_hand_coords and body_center):
-                self.webcam_logger.invalid_detection({
-                    'right_hand': right_hand_coords,
-                    'left_hand': left_hand_coords,
-                    'body_center': body_center
-                })
-                self.valid_landmarks_flag = False
-        else :
-            if left_hand_coords and right_hand_coords and body_center:
-                self.webcam_logger.valid_detection({
-                    'right_hand': right_hand_coords,
-                    'left_hand': left_hand_coords,
-                    'body_center': body_center
-                })
-                self.valid_landmarks_flag = True
-
-        # Semaphore Interpretation
-        detected_semaphore = "NONE"
-        if physical_right_hand_pos and physical_left_hand_pos:
-            key = (physical_right_hand_pos, physical_left_hand_pos)
-            detected_semaphore = SEMAPHORE_LETTERS.get(key, "NONE")
-            if detected_semaphore != "NONE":
-                 draw_guide_lines(frame, body_center, detected_semaphore, image_width, image_height)
-            else:
-                # Only show current hand positions if not forming a valid letter
-                draw_filled_octant(frame, body_center, physical_right_hand_pos, (200, 200, 0), 
-                                  alpha=0.15, image_width=image_width, image_height=image_height)
-                draw_filled_octant(frame, body_center, physical_left_hand_pos, (0, 255, 0), 
-                                  alpha=0.15, image_width=image_width, image_height=image_height)
-        
-        # Logging
-        if detected_semaphore != self.last_detected_semaphore:
-            self.last_detected_semaphore = detected_semaphore
-            self.webcam_logger.semaphore_detected(detected_semaphore, {
-                'right_hand': right_hand_coords,
-                'left_hand': left_hand_coords,
-                'body_center': body_center
-            })
-
         # Apply blur based on mode
         blur_amount = 31 # use an odd number !!
         if self.blur_mode > 0:
@@ -353,6 +260,124 @@ class WebcamPanel:
                         extra_blur = blur_amount * 2 + 1
                         blurred_face = cv2.GaussianBlur(face_roi, (extra_blur, extra_blur), 0)
                         frame[y:y+h, x:x+w] = blurred_face
+        
+        body_center = None
+        if results.pose_landmarks:
+            if self.display_mode == 0:
+                mp_drawing.draw_landmarks(frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
+            
+            # Body Center Calculation
+            left_shoulder = results.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_SHOULDER]
+            right_shoulder = results.pose_landmarks.landmark[mp_pose.PoseLandmark.RIGHT_SHOULDER]
+            nose = results.pose_landmarks.landmark[mp_pose.PoseLandmark.NOSE]
+            
+            if left_shoulder.visibility > 0.5 and right_shoulder.visibility > 0.5 and nose.visibility > 0.5:
+                shoulder_mid_x = (left_shoulder.x + right_shoulder.x) / 2
+                shoulder_mid_y = (left_shoulder.y + right_shoulder.y) / 2
+                
+                # Average the Y of the shoulder midpoint and the nose
+                body_center_x = shoulder_mid_x * image_width
+                body_center_y = ((shoulder_mid_y + nose.y) / 2) * image_height
+                
+                body_center = (int(body_center_x), int(body_center_y))
+                if self.display_mode == 0:
+                    cv2.circle(frame, body_center, 7, (255, 0, 0), -1) # Blue circle
+                    draw_additional_guidelines(frame, body_center)
+
+        # Hand position detection
+        physical_right_hand_pos = None # User's right hand (screen left)
+        physical_left_hand_pos = None  # User's left hand (screen right)
+
+        # Right hand (Screen Left)
+        right_hand_coords = None
+        if results.left_hand_landmarks:
+            if self.display_mode == 0:
+                mp_drawing.draw_landmarks(frame, results.left_hand_landmarks, mp_holistic.HAND_CONNECTIONS)
+            right_hand_coords = get_palm_top_coords(results.left_hand_landmarks, image_width, image_height)
+        elif results.pose_landmarks:
+            wrist = results.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_WRIST]
+            if wrist.visibility > 0.5:
+                right_hand_coords = (int(wrist.x * image_width), int(wrist.y * image_height))
+        
+        if right_hand_coords and body_center:
+            angle = calculate_angle(body_center, right_hand_coords)
+            physical_right_hand_pos = get_hand_position(angle)
+            if physical_right_hand_pos and self.display_mode == 0:
+                cv2.putText(frame, f'Right Hand (Screen): {physical_right_hand_pos}', (10, 60),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (200, 200, 0), 2)
+        
+        # Store for debug visualization
+        self.debug_right_hand_coords = right_hand_coords
+        self.debug_body_center = body_center
+
+        # Left hand (Screen Right)
+        left_hand_coords = None
+        if results.right_hand_landmarks:
+            if self.display_mode == 0:
+                mp_drawing.draw_landmarks(frame, results.right_hand_landmarks, mp_holistic.HAND_CONNECTIONS)
+            left_hand_coords = get_palm_top_coords(results.right_hand_landmarks, image_width, image_height)
+        elif results.pose_landmarks:
+            wrist = results.pose_landmarks.landmark[mp_pose.PoseLandmark.RIGHT_WRIST]
+            if wrist.visibility > 0.5:
+                left_hand_coords = (int(wrist.x * image_width), int(wrist.y * image_height))
+        
+        if left_hand_coords and body_center:
+            angle = calculate_angle(body_center, left_hand_coords)
+            physical_left_hand_pos = get_hand_position(angle)
+            if physical_left_hand_pos and self.display_mode == 0:
+                cv2.putText(frame, f'Left Hand (Screen): {physical_left_hand_pos}', (10, 30),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+        
+        # Store for debug visualization
+        self.debug_left_hand_coords = left_hand_coords
+            
+        # Logging
+        if self.valid_landmarks_flag :
+            if not (left_hand_coords and right_hand_coords and body_center):
+                self.webcam_logger.invalid_detection({
+                    'right_hand': right_hand_coords,
+                    'left_hand': left_hand_coords,
+                    'body_center': body_center
+                })
+                self.valid_landmarks_flag = False
+        else :
+            if left_hand_coords and right_hand_coords and body_center:
+                self.webcam_logger.valid_detection({
+                    'right_hand': right_hand_coords,
+                    'left_hand': left_hand_coords,
+                    'body_center': body_center
+                })
+                self.valid_landmarks_flag = True
+
+        # Semaphore Interpretation
+        detected_semaphore = "NONE"
+        if physical_right_hand_pos and physical_left_hand_pos:
+            key = (physical_right_hand_pos, physical_left_hand_pos)
+            detected_semaphore = SEMAPHORE_LETTERS.get(key, "NONE")
+            if detected_semaphore != "NONE" and self.display_mode == 0:
+                 draw_guide_lines(frame, body_center, detected_semaphore, image_width, image_height)
+            elif self.display_mode == 0:
+                # Only show current hand positions if not forming a valid letter
+                draw_filled_octant(frame, body_center, physical_right_hand_pos, (200, 200, 0), 
+                                  alpha=0.15, image_width=image_width, image_height=image_height)
+                draw_filled_octant(frame, body_center, physical_left_hand_pos, (0, 255, 0), 
+                                  alpha=0.15, image_width=image_width, image_height=image_height)
+        
+        # Logging
+        if detected_semaphore != self.last_detected_semaphore:
+            self.last_detected_semaphore = detected_semaphore
+            self.webcam_logger.semaphore_detected(detected_semaphore, {
+                'right_hand': right_hand_coords,
+                'left_hand': left_hand_coords,
+                'body_center': body_center
+            })
+
+        # Store latest results for drawing
+        self.latest_results = results
+        self.latest_body_center = body_center
+        self.latest_physical_right_hand_pos = physical_right_hand_pos
+        self.latest_physical_left_hand_pos = physical_left_hand_pos
+        self.latest_detected_semaphore = detected_semaphore
 
         return frame, detected_semaphore
 
@@ -360,13 +385,55 @@ class WebcamPanel:
         if frame is None:
             return
         
-        if self.debug_body_center:
-            if self.debug_right_hand_coords:
-                cv2.arrowedLine(frame, self.debug_body_center, self.debug_right_hand_coords, 
-                              (0, 200, 200), 3, tipLength=0.3)
-            if self.debug_left_hand_coords:
-                cv2.arrowedLine(frame, self.debug_body_center, self.debug_left_hand_coords, 
-                              (0, 255, 0), 3, tipLength=0.3)
+        # Handle different display modes
+        if self.display_mode == 1:  # Camera only
+            # Just show the raw camera frame without any overlays
+            pass  # frame is already the raw camera feed
+        elif self.display_mode in [2, 3]:  # Skeleton only or skeleton + overlay
+            # Create a black frame and draw skeleton
+            frame = np.zeros_like(frame)
+            if self.latest_results:
+                if self.latest_results.pose_landmarks:
+                    mp_drawing.draw_landmarks(frame, self.latest_results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
+                if self.latest_results.left_hand_landmarks:
+                    mp_drawing.draw_landmarks(frame, self.latest_results.left_hand_landmarks, mp_holistic.HAND_CONNECTIONS)
+                if self.latest_results.right_hand_landmarks:
+                    mp_drawing.draw_landmarks(frame, self.latest_results.right_hand_landmarks, mp_holistic.HAND_CONNECTIONS)
+                
+                # Draw overlays if mode 3
+                if self.display_mode == 3:
+                    # Draw body center
+                    if self.latest_body_center:
+                        cv2.circle(frame, self.latest_body_center, 7, (255, 0, 0), -1)
+                        draw_additional_guidelines(frame, self.latest_body_center)
+                    
+                    if self.latest_physical_right_hand_pos:
+                        cv2.putText(frame, f'Right Hand (Screen): {self.latest_physical_right_hand_pos}', (10, 60),
+                                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (200, 200, 0), 2)
+                    if self.latest_physical_left_hand_pos:
+                        cv2.putText(frame, f'Left Hand (Screen): {self.latest_physical_left_hand_pos}', (10, 30),
+                                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+                    
+                    # Draw semaphore guides if applicable
+                    if self.latest_detected_semaphore != "NONE" and self.latest_body_center:
+                        image_height, image_width = frame.shape[:2]
+                        draw_guide_lines(frame, self.latest_body_center, self.latest_detected_semaphore, image_width, image_height)
+                    elif self.latest_body_center and self.latest_physical_right_hand_pos and self.latest_physical_left_hand_pos:
+                        image_height, image_width = frame.shape[:2]
+                        draw_filled_octant(frame, self.latest_body_center, self.latest_physical_right_hand_pos, (200, 200, 0), 
+                                          alpha=0.15, image_width=image_width, image_height=image_height)
+                        draw_filled_octant(frame, self.latest_body_center, self.latest_physical_left_hand_pos, (0, 255, 0), 
+                                          alpha=0.15, image_width=image_width, image_height=image_height)
+        # For mode 0, frame already has everything drawn
+        
+        if debug_mode and self.display_mode == 0:  # Only draw debug arrows in mode 0
+            if self.debug_body_center:
+                if self.debug_right_hand_coords:
+                    cv2.arrowedLine(frame, self.debug_body_center, self.debug_right_hand_coords, 
+                                  (0, 200, 200), 3, tipLength=0.3)
+                if self.debug_left_hand_coords:
+                    cv2.arrowedLine(frame, self.debug_body_center, self.debug_left_hand_coords, 
+                                  (0, 255, 0), 3, tipLength=0.3)
             
         x, y, w, h = self.rect
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
