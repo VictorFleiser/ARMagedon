@@ -38,6 +38,9 @@ class MainMenu():
         if self.tutorial_screen:
             self.tutorial_screen.close()
 
+    def toggle_hard_mode(self):
+        print("Toggling hard mode")
+        self.profile_selection.hard_mode = not self.profile_selection.hard_mode
 
     def setup_start_menu(self):
         # 3 Buttons : Start, Calibration, Quit
@@ -45,10 +48,12 @@ class MainMenu():
         button_width, button_height = 300, 75
         button_x = (screen_width - button_width) // 2
         start_button_y = screen_height // 2 - button_height - 20
-        calibration_button_y = screen_height // 2
-        quit_button_y = screen_height // 2 + button_height + 20
+        hard_mode_button_y = screen_height // 2
+        calibration_button_y = screen_height // 2 + button_height + 20
+        quit_button_y = screen_height // 2 + 2 * (button_height + 20)
 
         self.start_button = Button((button_x, start_button_y, button_width, button_height), "Start Game", self.font, lambda: setattr(self, 'menu', 'Profiles'))
+        self.hard_mode_button = Button((button_x, hard_mode_button_y, button_width, button_height), "Hard Mode", self.font, self.toggle_hard_mode)
         self.calibration_button = Button((button_x, calibration_button_y, button_width, button_height), "Calibration", self.font, lambda: setattr(self, 'menu', 'Calibration'))
         self.quit_button = Button((button_x, quit_button_y, button_width, button_height), "Quit", self.font, lambda: pygame.event.post(pygame.event.Event(pygame.QUIT)))
 
@@ -98,6 +103,12 @@ class MainMenu():
     def draw(self):
         # Background
         self.screen.fill((0, 0, 0))
+        # assets/sprites/gameplay_bg_day.jpg image
+        if self.profile_selection.hard_mode:
+            # resize to screen size
+            self.screen.blit(pygame.transform.scale(pygame.image.load("assets/sprites/gameplay_bg_hard.jpg").convert(), self.screen.get_size()), (0, 0))
+        else:
+            self.screen.blit(pygame.transform.scale(pygame.image.load("assets/sprites/gameplay_bg_day.jpg").convert(), self.screen.get_size()), (0, 0))
 
         match self.menu:
             case "Start":
@@ -124,11 +135,15 @@ class MainMenu():
         self.screen.blit(title_text, title_rect)
         
         # 3 Buttons : Start, Calibration, Quit
+        # 4 Buttons : Start, Hard Mode, Calibration, Quit
         self.start_button.draw(self.screen)
+        self.hard_mode_button.draw(self.screen)
         self.calibration_button.draw(self.screen)
         self.quit_button.draw(self.screen)
 
     def draw_calibration_menu(self):
+        # black bg
+        self.screen.fill((0, 0, 0))
         # Webcam feed rectangle
         self.frame, detected_semaphore = self.webcam_section.update()
         self.webcam_section.draw(self.screen, self.frame)
@@ -172,6 +187,7 @@ class MainMenu():
         match self.menu:
             case "Start":
                 self.start_button.handle_event(event)
+                self.hard_mode_button.handle_event(event)
                 self.calibration_button.handle_event(event)
                 self.quit_button.handle_event(event)
             case "Calibration":
