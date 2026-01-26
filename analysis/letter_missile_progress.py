@@ -13,25 +13,6 @@ LOG_FILES = [
 ]
 
 # LOG_FILES = [
-#     "logs/gameplay_logs_Victor_Hard.jsonl",
-# ]
-
-# LOG_FILES = [
-#     "logs/gameplay_logs_Victor25min.jsonl",
-#     "logs/gameplay_logs_Victor30min.jsonl",
-#     "logs/gameplay_logs_Thomas33min.jsonl",
-# ]
-
-# LOG_FILES = [
-#     "logs/experimentation/gameplay_logs_And.jsonl",
-#     "logs/experimentation/gameplay_logs_H.jsonl",
-#     "logs/experimentation/gameplay_logs_Max.jsonl",
-# ]
-
-# LOG_FILES = [
-#     "logs/gameplay_logs_Victor25min.jsonl",
-#     "logs/gameplay_logs_Victor30min.jsonl",
-#     "logs/gameplay_logs_Thomas33min.jsonl",
 #     "logs/experimentation/gameplay_logs_And.jsonl",
 #     "logs/experimentation/gameplay_logs_H.jsonl",
 #     "logs/experimentation/gameplay_logs_Max.jsonl",
