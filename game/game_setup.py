@@ -10,6 +10,7 @@ from game.UI.webcam_section import WebcamPanel
 from game.gameplay_section import Gameplay
 from game.menus.pause_screen import PauseScreen
 from game.menus.level_transition_screen import LevelTransitionScreen
+from game.missiles.spawner_bkt_pick import BKTPickSpawner
 
 
 def setup_game(screen, current_profile, profile_manager):
@@ -81,7 +82,7 @@ def load_profile_data(current_profile, gameplay_section, status_section, level_t
     # P(K) always starts at P(L0) - no loading from profile
     
     # Load success_score from profile
-    if current_profile.get('success_score'):
+    if isinstance(gameplay_section.spawner, BKTPickSpawner) and current_profile.get('success_score'):
         print("Loading success_score from profile...")
         for letter, score in current_profile['success_score'].items():
             if letter in gameplay_section.spawner.bkt.success_score:
@@ -89,16 +90,20 @@ def load_profile_data(current_profile, gameplay_section, status_section, level_t
     
     # Load current level from profile
     saved_level = current_profile.get('current_level', 0)
-    if saved_level > 0 and gameplay_section.spawner.use_level_progression:
+    if isinstance(gameplay_section.spawner, BKTPickSpawner) and saved_level > 0 and gameplay_section.spawner.use_level_progression:
         print(f"Restoring to level {saved_level}...")
         gameplay_section.spawner.advance_to_level(saved_level)
+        gameplay_section.nb_missiles_to_destroy = gameplay_section.missiles_per_level[saved_level]
     
     # Stats (lives, bombs, score) are reset every session - no loading
     
     # Initialize first level transition (only for new players)
-    if gameplay_section.spawner.use_level_progression and gameplay_section.spawner.level_definitions and saved_level == 0:
+    if isinstance(gameplay_section.spawner, BKTPickSpawner) and gameplay_section.spawner.use_level_progression and gameplay_section.spawner.level_definitions and saved_level == 0:
         first_level_letters = gameplay_section.spawner.level_definitions[0]
         level_transition_screen.start_transition(1, first_level_letters, [])
         gameplay_logger.level_transition_started(1, first_level_letters)
     
-    print(f"Starting at level {gameplay_section.spawner.get_current_level() + 1} with letters: {gameplay_section.spawner.unlocked_letters}")
+    if isinstance(gameplay_section.spawner, BKTPickSpawner):
+        print(f"Starting at level {gameplay_section.spawner.get_current_level() + 1} with letters: {gameplay_section.spawner.unlocked_letters}")
+    else:
+        print("Starting with random spawner")

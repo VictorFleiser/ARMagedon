@@ -6,8 +6,8 @@ import time
 
 # --- PARAMETERS ---
 
-SEMAPHORES_PATH = "assets/semaphores/"
-# SEMAPHORES_PATH = "assets/semaphores_randomized/"
+# SEMAPHORES_PATH = "assets/semaphores/"
+SEMAPHORES_PATH = "assets/semaphores_randomized/"
 
 # --- Pygame setup ---
 pygame.init()

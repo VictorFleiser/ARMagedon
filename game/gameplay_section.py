@@ -36,12 +36,7 @@ class Gameplay:
         self.game_clock = game_clock
         self.audio_manager = audio_manager
         self.hard_mode = hard_mode
-        # # --- Debug mode (terminal display from the initial code back in september/october) ---
-        # self.debug_terminal = False
-        # self.font = pygame.font.SysFont("Consolas", 18)
-        # self.logs = []
-        # self.max_logs = 25
-        # self.last_ground_hit_time = time.time()
+        self.adaptation_enabled = False  # Toggle for adaptation: True = BKT adaptive, False = random/fixed
 
         # --- Grid computation ---
         self.cell_size = self.rect.width // self.grid_size
@@ -148,6 +143,7 @@ class Gameplay:
             ignore_correct_after_hint=True,
             use_level_progression=True,
             level_definitions=level_definitions,
+            adaptation_enabled=self.adaptation_enabled,
             bkt_params={
                 'p_l0': 0.0, # Initial probability of knowing
                 'p_t': 0.2, # Transition/learning probability
@@ -179,7 +175,8 @@ class Gameplay:
         self.bkt_snapshot_timer = 0.0
 
         self.missiles_destroyed_this_level = 0
-        self.nb_missiles_to_destroy = 10
+        self.missiles_per_level = [10, 20, 30, 30, 30, 30, 30, 30, 30]  # Required missiles for each level (0-8)
+        self.nb_missiles_to_destroy = self.missiles_per_level[0]
 
     # # -------------------------------------------------------
     # #                     Terminal Logging helper
@@ -338,17 +335,36 @@ class Gameplay:
         
         # Check for level advancement (if using BKT with level progression)
         if isinstance(self.spawner, BKTPickSpawner) and self.spawner.use_level_progression:
-            level_advancement = self.spawner.check_level_advancement()
-            if level_advancement is not None and self.missiles_destroyed_this_level >= self.nb_missiles_to_destroy:
-                next_level, new_letters = level_advancement
-                # Trigger level transition event
-                level_transition_event = pygame.event.Event(
-                    pygame.USEREVENT + 20, # Custom event for level transition
-                    level=next_level,
-                    new_letters=new_letters
-                )
-                pygame.event.post(level_transition_event)
-                self.missiles_destroyed_this_level = 0
+            # When adaptation disabled, advance based only on missiles destroyed
+            if not self.adaptation_enabled:
+                current_required = self.missiles_per_level[self.spawner.current_level]
+                if self.missiles_destroyed_this_level >= current_required and self.spawner.current_level < len(self.spawner.level_definitions) - 1:
+                    next_level = self.spawner.current_level + 1
+                    new_letters = self.spawner.level_definitions[next_level]
+                    # Trigger level transition event
+                    level_transition_event = pygame.event.Event(
+                        pygame.USEREVENT + 20, # Custom event for level transition
+                        level=next_level,
+                        new_letters=new_letters
+                    )
+                    pygame.event.post(level_transition_event)
+                    self.nb_missiles_to_destroy = self.missiles_per_level[next_level]
+                    self.missiles_destroyed_this_level = 0
+            else:
+                # Original adaptive logic
+                current_required = self.missiles_per_level[self.spawner.current_level]
+                level_advancement = self.spawner.check_level_advancement()
+                if level_advancement is not None and self.missiles_destroyed_this_level >= current_required:
+                    next_level, new_letters = level_advancement
+                    # Trigger level transition event
+                    level_transition_event = pygame.event.Event(
+                        pygame.USEREVENT + 20, # Custom event for level transition
+                        level=next_level,
+                        new_letters=new_letters
+                    )
+                    pygame.event.post(level_transition_event)
+                    self.nb_missiles_to_destroy = self.missiles_per_level[next_level]
+                    self.missiles_destroyed_this_level = 0
 
         self.missiles = [m for m in self.missiles if m.alive]
 

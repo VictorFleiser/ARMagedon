@@ -21,7 +21,8 @@ class BKTPickSpawner(MissileSpawner):
         ignore_correct_after_hint,
         bkt_params, # dict with BKT parameters (p_l0, p_t, p_s, p_g)
         use_level_progression, # whether to use level-based progression
-        level_definitions # list of letter groups for each level
+        level_definitions, # list of letter groups for each level
+        adaptation_enabled=True # whether to use adaptive selection and progression
     ):
         super().__init__(gameplay)
         
@@ -40,6 +41,7 @@ class BKTPickSpawner(MissileSpawner):
         self.level_definitions = level_definitions if level_definitions else []
         self.current_level = 0
         self.unlocked_letters = []
+        self.adaptation_enabled = adaptation_enabled
         
         # If using level progression, initialize with first level
         if self.use_level_progression and self.level_definitions:
@@ -99,8 +101,8 @@ class BKTPickSpawner(MissileSpawner):
 
         self.bkt.update_decay(dt)
 
-        # Only auto-increase letters if NOT using level progression
-        if not self.use_level_progression:
+        # Only auto-increase letters if NOT using level progression AND adaptation is enabled
+        if not self.use_level_progression and self.adaptation_enabled:
             if self.bkt.get_lowest_overall_knowledge() >= self.overall_knowledge_threshold:
                 # increase letter pool if possible
                 if self.number_of_letters_tested < len(self.available_letters):
@@ -112,6 +114,20 @@ class BKTPickSpawner(MissileSpawner):
             self.spawn_adaptive_missile()
     
     def select_letter_adaptive(self):
+        if not self.adaptation_enabled:
+            # Random selection when adaptation disabled
+            free_letters = self.get_free_letters()
+            if free_letters is None: return None
+            
+            if self.use_level_progression:
+                free_letters = list(set(free_letters) & set(self.unlocked_letters))
+            else:
+                free_letters = list(set(free_letters) & set(self.available_letters[:self.number_of_letters_tested]))
+            
+            if not free_letters: return None
+            return random.choice(free_letters)
+        
+        # Original adaptive logic
         probs_dict = self.get_selection_probabilities()
         if not probs_dict:
             return None
@@ -127,6 +143,10 @@ class BKTPickSpawner(MissileSpawner):
     
     def select_hint_timing(self, letter):
         """ Show hints based on P(K): lower knowledge = earlier hints, higher = later """
+        if not self.adaptation_enabled:
+            # Fixed random hint timing when adaptation disabled
+            return random.uniform(self.hint_min, self.hint_max)
+        
         p_k = self.bkt.get_knowledge(letter)
         base_hint = self.hint_min + p_k * (self.hint_max - self.hint_min)
         # randomness = random.uniform(-0.1, 0.1)
