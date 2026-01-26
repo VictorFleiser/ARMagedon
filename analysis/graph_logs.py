@@ -193,6 +193,8 @@ for log in logs:
 for letter in letters_active:
     record_decay(letter, last_update_time[letter], logical_time)
 
+all_letters = sorted(letters_active)
+
 # ============================
 # Plotly figure
 # ============================
@@ -313,33 +315,58 @@ if COMPUTE_MIN_KNOWLEDGE :
 # Compute average and median knowledge
 if COMPUTE_AVERAGE_KNOWLEDGE or COMPUTE_MEDIAN_KNOWLEDGE :
 
-    avg_values = []
+    introduced_avg_values = []
+    overall_avg_values = []
     median_values = []
     for t in all_times:
-        active_values = []
-        for letter in times:
-            # Use binary search to find latest value at or before time t
-            idx = bisect.bisect_right(times[letter], t) - 1
-            if idx >= 0:
-                active_values.append(values[letter][idx])
-        if active_values:
+        introduced_active_values = []
+        overall_active_values = []
+        for letter in all_letters:
+            if letter in times:
+                idx = bisect.bisect_right(times[letter], t) - 1
+                if idx >= 0:
+                    val = values[letter][idx]
+                    introduced_active_values.append(val)
+                    overall_active_values.append(val)
+                else:
+                    # not yet introduced
+                    overall_active_values.append(0.0)
+            else:
+                overall_active_values.append(0.0)
+        if introduced_active_values:
             if COMPUTE_AVERAGE_KNOWLEDGE:
-                avg_values.append(statistics.mean(active_values))
+                introduced_avg_values.append(statistics.mean(introduced_active_values))
             if COMPUTE_MEDIAN_KNOWLEDGE:
-                median_values.append(statistics.median(active_values))
+                median_values.append(statistics.median(introduced_active_values))
         else:
-            avg_values.append(0)
-            median_values.append(0)
+            if COMPUTE_AVERAGE_KNOWLEDGE:
+                introduced_avg_values.append(0)
+            if COMPUTE_MEDIAN_KNOWLEDGE:
+                median_values.append(0)
+        overall_avg_values.append(statistics.mean(overall_active_values))
 
     if COMPUTE_AVERAGE_KNOWLEDGE :
-        # trace for average knowledge
+        # trace for average knowledge (introduced letters)
         fig.add_trace(
             go.Scatter(
                 x=all_times,
-                y=avg_values,
+                y=introduced_avg_values,
                 mode="lines",
-                name="Average knowledge (all letters)",
+                name="Average knowledge (introduced letters)",
                 line=dict(width=3, color="blue"),
+                # legendgroup="knowledge_summary"
+            )
+        )
+        TRACE_GROUPS["knowledge_summary"].append(len(fig.data) - 1)
+
+        # trace for overall average knowledge
+        fig.add_trace(
+            go.Scatter(
+                x=all_times,
+                y=overall_avg_values,
+                mode="lines",
+                name="Overall average knowledge (all letters)",
+                line=dict(width=3, color="purple"),
                 # legendgroup="knowledge_summary"
             )
         )
@@ -352,7 +379,7 @@ if COMPUTE_AVERAGE_KNOWLEDGE or COMPUTE_MEDIAN_KNOWLEDGE :
                 x=all_times,
                 y=median_values,
                 mode="lines",
-                name="Median knowledge (all letters)",
+                name="Median knowledge (introduced letters)",
                 line=dict(width=3, color="green"),
                 # legendgroup="knowledge_summary"
             )
