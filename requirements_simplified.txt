@@ -1,7 +1,0 @@
-matplotlib==3.10.8
-mediapipe==0.10.21
-numpy==1.26.4
-opencv_python==4.10.0.84
-Pillow==12.1.0
-pygame==2.6.1
-scipy==1.17.0
