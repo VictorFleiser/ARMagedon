@@ -15,6 +15,9 @@ class MainMenu():
         self.font = pygame.font.SysFont(None, 72)
         self.small_font = pygame.font.SysFont(None, 36)
 
+        # Load sunset background for title screen
+        self.title_background = pygame.image.load("assets/sprites/gameplay_bg_sunset.jpg").convert()
+
         self.profile_manager = ProfileManager()
         self.selected_profile = None
 
@@ -107,6 +110,19 @@ class MainMenu():
                 self.draw_tutorial_menu()
     
     def draw_start_menu(self):
+        # Draw sunset background with low opacity
+        screen_width, screen_height = self.screen.get_size()
+        background = pygame.transform.scale(self.title_background, (screen_width, screen_height))
+        
+        # Create a semi-transparent version
+        background.set_alpha(30)  # Very low opacity (0-255, 30 is quite low)
+        self.screen.blit(background, (0, 0))
+        
+        # Draw title "ARMagedon"
+        title_text = self.font.render("ARMagedon", True, (255, 255, 255))
+        title_rect = title_text.get_rect(center=(screen_width // 2, screen_height // 4))
+        self.screen.blit(title_text, title_rect)
+        
         # 3 Buttons : Start, Calibration, Quit
         self.start_button.draw(self.screen)
         self.calibration_button.draw(self.screen)
@@ -146,6 +162,13 @@ class MainMenu():
                 self.start_game_callback()
 
     def handle_event(self, event):
+        # Global key handlers
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_b:
+                self.webcam_section.toggle_blur()
+            elif event.key == pygame.K_t:
+                self.webcam_section.toggle_display_mode()
+        
         match self.menu:
             case "Start":
                 self.start_button.handle_event(event)
