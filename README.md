@@ -14,6 +14,8 @@ This project is a serious game to learn the semaphore alphabet through a game in
 
 ## Prerequisites
 
+Python 3.11.9
+
 Install all the librairies in requirements.txt
 
 To run the scripts in analysis/ you may need the aditional librairies imported at the start of the scripts
