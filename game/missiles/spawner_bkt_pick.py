@@ -144,8 +144,8 @@ class BKTPickSpawner(MissileSpawner):
     def select_hint_timing(self, letter):
         """ Show hints based on P(K): lower knowledge = earlier hints, higher = later """
         if not self.adaptation_enabled:
-            # Fixed random hint timing when adaptation disabled
-            return random.uniform(self.hint_min, self.hint_max)
+            # Fixed hint timing at 0.65 when adaptation disabled
+            return 0.65
         
         p_k = self.bkt.get_knowledge(letter)
         base_hint = self.hint_min + p_k * (self.hint_max - self.hint_min)

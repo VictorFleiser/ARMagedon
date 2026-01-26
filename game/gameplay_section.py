@@ -175,7 +175,7 @@ class Gameplay:
         self.bkt_snapshot_timer = 0.0
 
         self.missiles_destroyed_this_level = 0
-        self.missiles_per_level = [10, 20, 30, 30, 30, 30, 30, 30, 30]  # Required missiles for each level (0-8)
+        self.missiles_per_level = [10, 20, 30, 30, 40, 40, 50, 50, 50]  # Required missiles for each level (0-8)
         self.nb_missiles_to_destroy = self.missiles_per_level[0]
 
     # # -------------------------------------------------------
